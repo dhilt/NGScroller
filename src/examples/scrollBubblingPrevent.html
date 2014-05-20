@@ -7,7 +7,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.5/angular.js"></script>
     <script src="../scripts/ui-scroll.coffee" type="text/coffeescript"></script>
     <script src="../scripts/ui-scroll-jqlite.coffee" type="text/coffeescript"></script>
-    <script src="listScroller.coffee" type="text/coffeescript"></script>
+    <script src="scrollBubblingPrevent.coffee" type="text/coffeescript"></script>
 </head>
 <body>
 <h2> Scroll bubbling prevent </h2>
@@ -19,7 +19,7 @@
 
     <div ui-scroll-viewport style="width: 400px; height: 300px; display: block; background-color: white;">
         <ul>
-            <li ui-scroll="item in datasource"  is-loading="loading">*{{item}}*</li>
+            <li ui-scroll="item in datasource">*{{item}}*</li>
         </ul>
     </div>
 

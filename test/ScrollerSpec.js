@@ -106,19 +106,23 @@ describe('uiScroll', function () {
 				spyOn($.fn, 'unbind').andCallThrough();
 				runTest(html,
 					function($window) {
-						expect($.fn.bind.calls.length).toBe(2);
+						expect($.fn.bind.calls.length).toBe(3);
 						expect($.fn.bind.calls[0].args[0]).toBe('resize');
 						expect($.fn.bind.calls[0].object[0]).toBe($window);
 						expect($.fn.bind.calls[1].args[0]).toBe('scroll');
 						expect($.fn.bind.calls[1].object[0]).toBe($window);
+						expect($.fn.bind.calls[2].args[0]).toBe('mousewheel');
+						expect($.fn.bind.calls[2].object.prevObject[0]).toBe($window);
 						expect($._data($window, 'events')).toBeDefined();
 					},
 					function($window) {
-						expect($.fn.unbind.calls.length).toBe(2);
+						expect($.fn.unbind.calls.length).toBe(3);
 						expect($.fn.unbind.calls[0].args[0]).toBe('resize');
 						expect($.fn.unbind.calls[0].object[0]).toBe($window);
 						expect($.fn.unbind.calls[1].args[0]).toBe('scroll');
 						expect($.fn.unbind.calls[1].object[0]).toBe($window);
+						expect($.fn.unbind.calls[2].args[0]).toBe('mousewheel');
+						expect($.fn.unbind.calls[2].object.prevObject[0]).toBe($window);
 					}
 				);
 			});

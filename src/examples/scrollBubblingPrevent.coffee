@@ -4,8 +4,8 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite'])
 
 			(console, $timeout)->
 
-				min = -30
-				max = 30
+				min = -50
+				max = 50
 
 				get = (index, count, success)->
 					$timeout(

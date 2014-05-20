@@ -12,7 +12,7 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite'])
 						->
 							result = []
 							for i in [index..index + count-1]
-								if i <= min or i >= max
+								if i < min or i > max
 									break
 								result.push "item ##{i}"
 							success(result)

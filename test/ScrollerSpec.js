@@ -625,11 +625,14 @@ describe('uiScroll', function () {
                 function($window, sandbox) {
                     var documentScrollCount = 0;
                     var scroller = sandbox.find('[ui-scroll-viewport]');
+                    var wheelEventElement = scroller[0];
 
-                    var el = scroller[0];
-                    var evt = document.createEvent("MouseEvents");
-                    evt.initEvent('mousewheel', true, true);
-                    evt.wheelDelta = 120;
+                    var getNewWheelEvent = function () {
+                        var event = document.createEvent("MouseEvents");
+                        event.initEvent('mousewheel', true, true);
+                        event.wheelDelta = 120;
+                        return event;
+                    };
 
                     angular.element(document.body).bind('mousewheel', function (e) {
                         documentScrollCount++;
@@ -638,30 +641,21 @@ describe('uiScroll', function () {
                     //simulate multiple wheel-scroll events within viewport
 
                     scroller.scrollTop(0);
-                    el.dispatchEvent(evt);      //mousewheel low-level event
-                    //scroller.trigger('scroll'); //scroll event
-                    flush();
-                    expect(documentScrollCount).toBe(0);
-
-                    scroller.scrollTop(0);
-                    el.dispatchEvent(evt);      //mousewheel low-level event
+                    wheelEventElement.dispatchEvent(getNewWheelEvent()); //mousewheel low-level event
                     scroller.trigger('scroll'); //scroll event
                     flush();
                     expect(documentScrollCount).toBe(0);
 
                     scroller.scrollTop(0);
-                    el.dispatchEvent(evt);
-                    expect(flush).toThrow();
+                    wheelEventElement.dispatchEvent(getNewWheelEvent()); //mousewheel low-level event
+                    scroller.trigger('scroll'); //scroll event
+                    flush();
+                    expect(documentScrollCount).toBe(0);
+
+                    scroller.scrollTop(0);
+                    wheelEventElement.dispatchEvent(getNewWheelEvent());
+                    expect(flush).toThrow(); //the end of data: no load, no prevent
                     expect(documentScrollCount).toBe(1);
-
-                    /*
-                    expect(spy.calls.length).toBe(5);
-
-                    expect(spy.calls[0].args[0]).toBe(1);
-                    expect(spy.calls[1].args[0]).toBe(4);
-                    expect(spy.calls[2].args[0]).toBe(-2); //first full
-                    expect(spy.calls[3].args[0]).toBe(-5); //last full
-                    expect(spy.calls[4].args[0]).toBe(-8); //empty*/
 
                 }, null, {
                     sandbox: sandbox,
@@ -672,43 +666,6 @@ describe('uiScroll', function () {
             );
 
         });
-
-
-        /*it('...', function() {
-            var spy, flush;
-            var viewportHeight = buffer * itemHeight;
-
-            inject(function (myDatasourceToPreventScrollBubbling) {
-                spy = spyOn(myDatasourceToPreventScrollBubbling, 'get').andCallThrough();
-            });
-            inject(function ($timeout) {
-                flush = $timeout.flush;
-            });
-
-            runTest(makeHtml(viewportHeight),
-                function($window, sandbox) {
-                    var scroller = sandbox.children();
-                    scroller.scrollTop(0); //first full
-                    scroller.trigger('scroll');
-                    flush();
-                    scroller.scrollTop(0); //last full
-                    scroller.trigger('scroll');
-                    flush();
-                    scroller.scrollTop(0); //empty
-                    scroller.trigger('scroll');
-                    expect(flush).toThrow();
-
-                    expect(spy.calls.length).toBe(5);
-
-                    expect(spy.calls[0].args[0]).toBe(1);
-                    expect(spy.calls[1].args[0]).toBe(4);
-                    expect(spy.calls[2].args[0]).toBe(-2); //first full
-                    expect(spy.calls[3].args[0]).toBe(-5); //last full
-                    expect(spy.calls[4].args[0]).toBe(-8); //empty
-
-                }
-            );
-        });*/
 
     });
 

@@ -280,7 +280,7 @@ angular.module('ui.scroll', [])
 										break
 
 						adjustBuffer = (rid, scrolling, newItems, finalize)->
-							if newItems
+							if newItems and newItems.length
 								$timeout ->
 									for row in newItems
 										adjustRowHeight row.appended, row.wrapper
@@ -356,8 +356,12 @@ angular.module('ui.scroll', [])
 						wheelHandler = (e) ->
 							if !bof and viewport[0].scrollTop is 0
 								e.preventDefault()
+								e.stopPropagation()
+								return false
 							if !eof and viewport[0].scrollTop is (viewport[0].scrollHeight - viewport[0].offsetHeight)
 								e.preventDefault()
+								e.stopPropagation()
+								return false
 
 						viewport.parent().bind 'mousewheel', wheelHandler
 

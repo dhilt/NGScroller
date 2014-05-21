@@ -70,18 +70,44 @@ describe('uiScroll', function () {
                     }
 				};
 			}
+		])
+
+		.factory('myDatasourceToPreventScrollBubbling', [
+			'$log', '$timeout', '$rootScope', function() {
+				return {
+					get: function(index, count, success) {
+                        var result = [];
+                        for (var i = index; i<index+count; i++) {
+                            if (i<-6 || i>20) {
+                                break;
+                            }
+                            result.push('item' + i);
+                            /*if (i>-20 && i<20) {
+                                result.push('item' + i);
+                            }
+                            break;*/
+                        }
+                        success(result);
+                    }
+				};
+			}
 		]);
 
     beforeEach(module('ui.scroll'));
     beforeEach(module('ui.scroll.test'));
 
-	var runTest = function(html, runTest, cleanupTest) {
+	var runTest = function(html, runTest, cleanupTest, options) {
 		inject(function($rootScope, $compile, $window, $timeout) {
 				var scroller = angular.element(html);
 				var scope = $rootScope.$new();
-				var sandbox = angular.element('<div/>');
+				var sandbox = options && options.sandbox ? options.sandbox : angular.element('<div/>');
 				angular.element(document).find('body').append(sandbox);
-				sandbox.append(scroller);
+                if(options && options.sandboxAppend) {
+                    options.sandboxAppend(scroller);
+                }
+                else {
+                    sandbox.append(scroller);
+                }
 				$compile(scroller)(scope);
 				scope.$apply();
 				$timeout.flush();
@@ -92,7 +118,7 @@ describe('uiScroll', function () {
 				scope.$destroy();
 
 				if (cleanupTest) {
-					cleanupTest($window, scope);
+					//cleanupTest($window, scope);
 				}
 			}
 		);
@@ -560,10 +586,129 @@ describe('uiScroll', function () {
                     expect(spy.calls[2].args[0]).toBe(-2); //first full
                     expect(spy.calls[3].args[0]).toBe(-5); //last full
                     expect(spy.calls[4].args[0]).toBe(-8); //empty
-                   
+
                 }
             );
         });
+
+    });
+
+
+    describe('prevent unwanted scroll bubbling', function () {
+
+        var itemsCount = 12, buffer = 3, itemHeight = 20;
+
+        var sandbox = angular.element('<div style="width: 400px; background-color: rgba(255, 249, 0, 0.28); "/>');
+        sandbox.append(angular.element('<div data-scroller-pre-append></div>'));
+        sandbox.append(angular.element('<div data-scroller-append></div>'));
+        sandbox.append(angular.element('<div data-scroller-post-append></div>'));
+        sandbox.find('[data-scroller-pre-append]').html('text<br>text<br>text<br>text<br>');
+        //sandbox.find('[data-scroller-pre-append]').html('text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>');
+        sandbox.find('[data-scroller-post-append]').html('text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br></div>');
+
+        var makeHtml = function (viewportHeight) {
+            return '<div ui-scroll-viewport style="width: 400px; height: 300px; display: block; background-color: white;"><ul><li ui-scroll="item in myDatasourceToPreventScrollBubbling" buffer-size="3">{{$index}}: {{item}}</li></ul></div>';
+        };
+
+        it('[full frame] should call get on the datasource 4 (12/3) times + 2 additional times (with empty result)', function() {
+            var spy, flush;
+            var viewportHeight = buffer * itemHeight;
+
+            inject(function (myDatasourceToPreventScrollBubbling) {
+                spy = spyOn(myDatasourceToPreventScrollBubbling, 'get').andCallThrough();
+            });
+            inject(function ($timeout) {
+                flush = $timeout.flush;
+            });
+
+            runTest(makeHtml(viewportHeight),
+                function($window, sandbox) {
+                    var documentScrollCount = 0;
+                    var scroller = sandbox.find('[ui-scroll-viewport]');
+
+                    var el = scroller[0];
+                    var evt = document.createEvent("MouseEvents");
+                    evt.initEvent('mousewheel', true, true);
+                    evt.wheelDelta = 120;
+
+                    angular.element(document.body).bind('mousewheel', function (e) {
+                        documentScrollCount++;
+                    });
+
+                    //simulate multiple wheel-scroll events within viewport
+
+                    scroller.scrollTop(0);
+                    el.dispatchEvent(evt);      //mousewheel low-level event
+                    //scroller.trigger('scroll'); //scroll event
+                    flush();
+                    expect(documentScrollCount).toBe(0);
+
+                    scroller.scrollTop(0);
+                    el.dispatchEvent(evt);      //mousewheel low-level event
+                    scroller.trigger('scroll'); //scroll event
+                    flush();
+                    expect(documentScrollCount).toBe(0);
+
+                    scroller.scrollTop(0);
+                    el.dispatchEvent(evt);
+                    expect(flush).toThrow();
+                    expect(documentScrollCount).toBe(1);
+
+                    /*
+                    expect(spy.calls.length).toBe(5);
+
+                    expect(spy.calls[0].args[0]).toBe(1);
+                    expect(spy.calls[1].args[0]).toBe(4);
+                    expect(spy.calls[2].args[0]).toBe(-2); //first full
+                    expect(spy.calls[3].args[0]).toBe(-5); //last full
+                    expect(spy.calls[4].args[0]).toBe(-8); //empty*/
+
+                }, null, {
+                    sandbox: sandbox,
+                    sandboxAppend: function (scroller) {
+                        sandbox.find('[data-scroller-append]').append(scroller);
+                    }
+                }
+            );
+
+        });
+
+
+        /*it('...', function() {
+            var spy, flush;
+            var viewportHeight = buffer * itemHeight;
+
+            inject(function (myDatasourceToPreventScrollBubbling) {
+                spy = spyOn(myDatasourceToPreventScrollBubbling, 'get').andCallThrough();
+            });
+            inject(function ($timeout) {
+                flush = $timeout.flush;
+            });
+
+            runTest(makeHtml(viewportHeight),
+                function($window, sandbox) {
+                    var scroller = sandbox.children();
+                    scroller.scrollTop(0); //first full
+                    scroller.trigger('scroll');
+                    flush();
+                    scroller.scrollTop(0); //last full
+                    scroller.trigger('scroll');
+                    flush();
+                    scroller.scrollTop(0); //empty
+                    scroller.trigger('scroll');
+                    expect(flush).toThrow();
+
+                    expect(spy.calls.length).toBe(5);
+
+                    expect(spy.calls[0].args[0]).toBe(1);
+                    expect(spy.calls[1].args[0]).toBe(4);
+                    expect(spy.calls[2].args[0]).toBe(-2); //first full
+                    expect(spy.calls[3].args[0]).toBe(-5); //last full
+                    expect(spy.calls[4].args[0]).toBe(-8); //empty
+
+                }
+            );
+        });*/
 
     });
 

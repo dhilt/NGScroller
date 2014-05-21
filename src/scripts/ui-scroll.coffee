@@ -280,7 +280,7 @@ angular.module('ui.scroll', [])
 										break
 
 						adjustBuffer = (rid, scrolling, newItems, finalize)->
-							if newItems and newItems.length
+							if newItems
 								$timeout ->
 									for row in newItems
 										adjustRowHeight row.appended, row.wrapper

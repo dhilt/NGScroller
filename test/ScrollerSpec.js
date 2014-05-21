@@ -596,28 +596,22 @@ describe('uiScroll', function () {
 
     describe('prevent unwanted scroll bubbling', function () {
 
-        var itemsCount = 12, buffer = 3, itemHeight = 20;
-
         var sandbox = angular.element('<div style="width: 400px; background-color: rgba(255, 249, 0, 0.28); "/>');
         sandbox.append(angular.element('<div data-scroller-pre-append></div>'));
         sandbox.append(angular.element('<div data-scroller-append></div>'));
         sandbox.append(angular.element('<div data-scroller-post-append></div>'));
         sandbox.find('[data-scroller-pre-append]').html('text<br>text<br>text<br>text<br>');
-        //sandbox.find('[data-scroller-pre-append]').html('text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>');
         sandbox.find('[data-scroller-post-append]').html('text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br></div>');
 
-        var makeHtml = function (viewportHeight) {
-            return '<div ui-scroll-viewport style="width: 400px; height: 300px; display: block; background-color: white;"><ul><li ui-scroll="item in myDatasourceToPreventScrollBubbling" buffer-size="3">{{$index}}: {{item}}</li></ul></div>';
-        };
+        var commonHtml = '<div ui-scroll-viewport style="width: 400px; height: 300px; display: block; background-color: white;"><ul><li ui-scroll="item in myDatasourceToPreventScrollBubbling" buffer-size="3">{{$index}}: {{item}}</li></ul></div>';
 
         var documentScrollCount = 0;
         var incrementDocumentScrollCount = function() {
             documentScrollCount++;
         };
 
-        it('[full frame] should call get on the datasource 4 (12/3) times + 2 additional times (with empty result)', function() {
+        it('should prevent some wheel-events (2) until bof is reached and then scroll entire document', function() {
             var spy, flush;
-            var viewportHeight = buffer * itemHeight;
 
             inject(function (myDatasourceToPreventScrollBubbling) {
                 spy = spyOn(myDatasourceToPreventScrollBubbling, 'get').andCallThrough();
@@ -626,7 +620,7 @@ describe('uiScroll', function () {
                 flush = $timeout.flush;
             });
 
-            runTest(makeHtml(viewportHeight),
+            runTest(commonHtml,
                 function($window, sandbox) {
                     var scroller = sandbox.find('[ui-scroll-viewport]');
                     var wheelEventElement = scroller[0];

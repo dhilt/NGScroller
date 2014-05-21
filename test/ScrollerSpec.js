@@ -118,7 +118,7 @@ describe('uiScroll', function () {
 				scope.$destroy();
 
 				if (cleanupTest) {
-					//cleanupTest($window, scope);
+					cleanupTest($window, scope);
 				}
 			}
 		);
@@ -610,6 +610,11 @@ describe('uiScroll', function () {
             return '<div ui-scroll-viewport style="width: 400px; height: 300px; display: block; background-color: white;"><ul><li ui-scroll="item in myDatasourceToPreventScrollBubbling" buffer-size="3">{{$index}}: {{item}}</li></ul></div>';
         };
 
+        var documentScrollCount = 0;
+        var incrementDocumentScrollCount = function() {
+            documentScrollCount++;
+        };
+
         it('[full frame] should call get on the datasource 4 (12/3) times + 2 additional times (with empty result)', function() {
             var spy, flush;
             var viewportHeight = buffer * itemHeight;
@@ -623,7 +628,6 @@ describe('uiScroll', function () {
 
             runTest(makeHtml(viewportHeight),
                 function($window, sandbox) {
-                    var documentScrollCount = 0;
                     var scroller = sandbox.find('[ui-scroll-viewport]');
                     var wheelEventElement = scroller[0];
 
@@ -634,9 +638,7 @@ describe('uiScroll', function () {
                         return event;
                     };
 
-                    angular.element(document.body).bind('mousewheel', function (e) {
-                        documentScrollCount++;
-                    });
+                    angular.element(document.body).bind('mousewheel', incrementDocumentScrollCount); //spy for wheel-events bubbling
 
                     //simulate multiple wheel-scroll events within viewport
 
@@ -657,7 +659,9 @@ describe('uiScroll', function () {
                     expect(flush).toThrow(); //the end of data: no load, no prevent
                     expect(documentScrollCount).toBe(1);
 
-                }, null, {
+                }, function() {
+                    angular.element(document.body).unbind('mousewheel', incrementDocumentScrollCount);
+                }, {
                     sandbox: sandbox,
                     sandboxAppend: function (scroller) {
                         sandbox.find('[data-scroller-append]').append(scroller);

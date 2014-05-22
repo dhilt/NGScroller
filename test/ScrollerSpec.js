@@ -82,10 +82,6 @@ describe('uiScroll', function () {
                                 break;
                             }
                             result.push('item' + i);
-                            /*if (i>-20 && i<20) {
-                                result.push('item' + i);
-                            }
-                            break;*/
                         }
                         success(result);
                     }
@@ -101,16 +97,22 @@ describe('uiScroll', function () {
 				var scroller = angular.element(html);
 				var scope = $rootScope.$new();
 				var sandbox = options && options.sandbox ? options.sandbox : angular.element('<div/>');
+
 				angular.element(document).find('body').append(sandbox);
+
                 if(options && options.sandboxAppend) {
                     options.sandboxAppend(scroller);
                 }
                 else {
                     sandbox.append(scroller);
                 }
+
 				$compile(scroller)(scope);
 				scope.$apply();
-				$timeout.flush();
+
+                if(!options || !options.noFlush) {
+                    $timeout.flush();
+                }
 
 				runTest($window, sandbox);
 
@@ -149,7 +151,10 @@ describe('uiScroll', function () {
 						expect($.fn.unbind.calls[1].object[0]).toBe($window);
 						expect($.fn.unbind.calls[2].args[0]).toBe('mousewheel');
 						expect($.fn.unbind.calls[2].object.prevObject[0]).toBe($window);
-					}
+					},
+                    {
+                      noFlush: true //empty data-set; nothing to render
+                    }
 				);
 			});
 
@@ -166,7 +171,9 @@ describe('uiScroll', function () {
 						expect(bottomPadding.tagName.toLowerCase()).toBe('div');
 						expect(angular.element(bottomPadding).css('height')).toBe('0px');
 
-					}
+					}, null, {
+                        noFlush: true
+                    }
 				);
 			});
 
@@ -181,7 +188,9 @@ describe('uiScroll', function () {
 						expect(spy.calls[0].args[0]).toBe(1);
 						expect(spy.calls[1].args[0]).toBe(-9);
 
-					}
+					}, null, {
+                        noFlush: true
+                    }
 				);
 			});
 		}
@@ -569,13 +578,13 @@ describe('uiScroll', function () {
             runTest(makeHtml(viewportHeight),
                 function($window, sandbox) {
                     var scroller = sandbox.children();
-                    scroller.scrollTop(0); //first full
+                    scroller.scrollTop(0); //first full, scroll to -2
                     scroller.trigger('scroll');
                     flush();
-                    scroller.scrollTop(0); //last full
+                    scroller.scrollTop(0); //last full, scroll to -5, bof is reached
                     scroller.trigger('scroll');
-                    flush();
-                    scroller.scrollTop(0); //empty
+                    expect(flush).toThrow();
+                    scroller.scrollTop(0); //empty, no scroll occured (-8)
                     scroller.trigger('scroll');
                     expect(flush).toThrow();
 
@@ -636,21 +645,21 @@ describe('uiScroll', function () {
 
                     //simulate multiple wheel-scroll events within viewport
 
-                    scroller.scrollTop(0);
-                    wheelEventElement.dispatchEvent(getNewWheelEvent()); //mousewheel low-level event
-                    scroller.trigger('scroll'); //scroll event
-                    flush();
-                    expect(documentScrollCount).toBe(0);
-
-                    scroller.scrollTop(0);
-                    wheelEventElement.dispatchEvent(getNewWheelEvent()); //mousewheel low-level event
-                    scroller.trigger('scroll'); //scroll event
-                    flush();
-                    expect(documentScrollCount).toBe(0);
-
-                    scroller.scrollTop(0);
                     wheelEventElement.dispatchEvent(getNewWheelEvent());
-                    expect(flush).toThrow(); //the end of data: no load, no prevent
+                    scroller.scrollTop(0);
+                    scroller.trigger('scroll');
+                    flush();
+                    expect(documentScrollCount).toBe(0);
+
+                    wheelEventElement.dispatchEvent(getNewWheelEvent());
+                    scroller.scrollTop(0);
+                    scroller.trigger('scroll');
+                    expect(flush).toThrow(); //there is no new data, bof is reached
+                    expect(documentScrollCount).toBe(0); //because of empty response has come after scroll trigger
+
+                    wheelEventElement.dispatchEvent(getNewWheelEvent());
+                    scroller.scrollTop(0);
+                    scroller.trigger('scroll');
                     expect(documentScrollCount).toBe(1);
 
                 }, function() {

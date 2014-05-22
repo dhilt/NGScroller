@@ -353,12 +353,13 @@ angular.module('ui.scroll', [])
 
 						viewport.bind 'scroll', scrollHandler
 
-						wheelHandler = (e) ->
-							if !(bof and viewport[0].scrollTop is 0) and !(eof and viewport[0].scrollTop is (viewport[0].scrollHeight - viewport[0].offsetHeight))
-								e.preventDefault()
-								e.stopPropagation()
+						wheelHandler = (event) ->
+							scrollTop = viewport[0].scrollTop
+							yMax = viewport[0].scrollHeight - viewport[0].offsetHeight
+							if (scrollTop is 0 and not bof) or (scrollTop is yMax and not eof)
+								event.preventDefault()
 
-						viewport.parent().bind 'mousewheel', wheelHandler
+						viewport.bind 'mousewheel', wheelHandler
 
 						$scope.$watch datasource.revision,
 							-> reload()
@@ -372,7 +373,7 @@ angular.module('ui.scroll', [])
 							eventListener.$destroy()
 							viewport.unbind 'resize', resizeHandler
 							viewport.unbind 'scroll', scrollHandler
-							viewport.parent().unbind 'mousewheel', wheelHandler
+							viewport.unbind 'mousewheel', wheelHandler
 
 						eventListener.$on "update.items", (event, locator, newItem)->
 							if angular.isFunction locator

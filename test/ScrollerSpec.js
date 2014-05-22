@@ -96,16 +96,9 @@ describe('uiScroll', function () {
 		inject(function($rootScope, $compile, $window, $timeout) {
 				var scroller = angular.element(html);
 				var scope = $rootScope.$new();
-				var sandbox = options && options.sandbox ? options.sandbox : angular.element('<div/>');
-
+				var sandbox = angular.element('<div/>');
 				angular.element(document).find('body').append(sandbox);
-
-				if(options && options.sandboxAppend) {
-					options.sandboxAppend(scroller);
-				}
-				else {
-					sandbox.append(scroller);
-				}
+				sandbox.append(scroller);
 
 				$compile(scroller)(scope);
 				scope.$apply();
@@ -140,7 +133,7 @@ describe('uiScroll', function () {
 						expect($.fn.bind.calls[1].args[0]).toBe('scroll');
 						expect($.fn.bind.calls[1].object[0]).toBe($window);
 						expect($.fn.bind.calls[2].args[0]).toBe('mousewheel');
-						expect($.fn.bind.calls[2].object.prevObject[0]).toBe($window);
+						expect($.fn.bind.calls[2].object[0]).toBe($window);
 						expect($._data($window, 'events')).toBeDefined();
 					},
 					function($window) {
@@ -150,7 +143,7 @@ describe('uiScroll', function () {
 						expect($.fn.unbind.calls[1].args[0]).toBe('scroll');
 						expect($.fn.unbind.calls[1].object[0]).toBe($window);
 						expect($.fn.unbind.calls[2].args[0]).toBe('mousewheel');
-						expect($.fn.unbind.calls[2].object.prevObject[0]).toBe($window);
+						expect($.fn.unbind.calls[2].object[0]).toBe($window);
 					},
 					{
 						noFlush: true //empty data-set; nothing to render
@@ -605,21 +598,22 @@ describe('uiScroll', function () {
 
     describe('prevent unwanted scroll bubbling', function () {
 
-        var sandbox = angular.element('<div style="width: 400px; background-color: rgba(255, 249, 0, 0.28); "/>');
-        sandbox.append(angular.element('<div data-scroller-pre-append></div>'));
-        sandbox.append(angular.element('<div data-scroller-append></div>'));
-        sandbox.append(angular.element('<div data-scroller-post-append></div>'));
-        sandbox.find('[data-scroller-pre-append]').html('text<br>text<br>text<br>text<br>');
-        sandbox.find('[data-scroller-post-append]').html('text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br></div>');
-
         var commonHtml = '<div ui-scroll-viewport style="width: 400px; height: 300px; display: block; background-color: white;"><ul><li ui-scroll="item in myDatasourceToPreventScrollBubbling" buffer-size="3">{{$index}}: {{item}}</li></ul></div>';
-
-        var documentScrollCount = 0;
-        var incrementDocumentScrollCount = function() {
-            documentScrollCount++;
+        var documentScrollBubblingCount = 0;
+        var incrementDocumentScrollCount = function(event) {
+            event = event.originalEvent || event;
+            if(!event.defaultPrevented) {
+                documentScrollBubblingCount++;
+            }
+        };
+        var getNewWheelEvent = function () {
+            var event = document.createEvent("MouseEvents");
+            event.initEvent('mousewheel', true, true);
+            event.wheelDelta = 120;
+            return event;
         };
 
-        it('should prevent some wheel-events (2) until bof is reached and then scroll entire document', function() {
+        it('should prevent wheel-event bubbling until bof is reached', function() {
             var spy, flush;
 
             inject(function (myDatasourceToPreventScrollBubbling) {
@@ -631,49 +625,44 @@ describe('uiScroll', function () {
 
             runTest(commonHtml,
                 function($window, sandbox) {
-                    var scroller = sandbox.find('[ui-scroll-viewport]');
+                    var scroller = sandbox.children();
                     var wheelEventElement = scroller[0];
-
-                    var getNewWheelEvent = function () {
-                        var event = document.createEvent("MouseEvents");
-                        event.initEvent('mousewheel', true, true);
-                        event.wheelDelta = 120;
-                        return event;
-                    };
 
                     angular.element(document.body).bind('mousewheel', incrementDocumentScrollCount); //spy for wheel-events bubbling
 
                     //simulate multiple wheel-scroll events within viewport
 
-                    wheelEventElement.dispatchEvent(getNewWheelEvent());
+                    wheelEventElement.dispatchEvent(getNewWheelEvent()); //preventDefault will not occurred but document will not scroll because of viewport will be scrolled
+                    expect(documentScrollBubblingCount).toBe(1);
+
                     scroller.scrollTop(0);
                     scroller.trigger('scroll');
+
+                    wheelEventElement.dispatchEvent(getNewWheelEvent()); //now we are at top but preventDefault will occur because of bof will be reached only after next scroll trigger
+                    expect(documentScrollBubblingCount).toBe(1); //here! the only one prevented wheel-event
+
                     flush();
-                    expect(documentScrollCount).toBe(0);
 
-                    wheelEventElement.dispatchEvent(getNewWheelEvent());
+                    wheelEventElement.dispatchEvent(getNewWheelEvent()); //preventDefault will not occurred but document will not scroll because of viewport will be scrolled
+                    expect(documentScrollBubblingCount).toBe(2);
+
                     scroller.scrollTop(0);
-                    scroller.trigger('scroll');
+                    scroller.trigger('scroll'); //bof will be reach here
+
+                    wheelEventElement.dispatchEvent(getNewWheelEvent()); //preventDefault will not occurred because we are at top and bof is reached
+                    expect(documentScrollBubblingCount).toBe(3);
+
                     expect(flush).toThrow(); //there is no new data, bof is reached
-                    expect(documentScrollCount).toBe(0); //because of empty response has come after scroll trigger
 
-                    wheelEventElement.dispatchEvent(getNewWheelEvent());
-                    scroller.scrollTop(0);
-                    scroller.trigger('scroll');
-                    expect(documentScrollCount).toBe(1);
+                    wheelEventElement.dispatchEvent(getNewWheelEvent()); //preventDefault will not occurred because we are at top and bof is reached
+                    expect(documentScrollBubblingCount).toBe(4);
 
                 }, function() {
                     angular.element(document.body).unbind('mousewheel', incrementDocumentScrollCount);
-                }, {
-                    sandbox: sandbox,
-                    sandboxAppend: function (scroller) {
-                        sandbox.find('[data-scroller-append]').append(scroller);
-                    }
                 }
             );
 
         });
-
     });
 
 });

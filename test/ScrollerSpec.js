@@ -61,13 +61,13 @@ describe('uiScroll', function () {
 			'$log', '$timeout', '$rootScope', function() {
 				return {
 					get: function(index, count, success) {
-                        var result = [];
-                        for (var i = index; i<index+count; i++) {
-                            if (i>-6 && i<=6)
-                                result.push('item' + i);
-                        }
-                        success(result);
-                    }
+						var result = [];
+						for (var i = index; i<index+count; i++) {
+							if (i>-6 && i<=6)
+								result.push('item' + i);
+						}
+						success(result);
+					}
 				};
 			}
 		])
@@ -76,15 +76,15 @@ describe('uiScroll', function () {
 			'$log', '$timeout', '$rootScope', function() {
 				return {
 					get: function(index, count, success) {
-                        var result = [];
-                        for (var i = index; i<index+count; i++) {
-                            if (i<-6 || i>20) {
-                                break;
-                            }
-                            result.push('item' + i);
-                        }
-                        success(result);
-                    }
+						var result = [];
+						for (var i = index; i<index+count; i++) {
+							if (i<-6 || i>20) {
+								break;
+							}
+							result.push('item' + i);
+						}
+						success(result);
+					}
 				};
 			}
 		]);
@@ -100,19 +100,19 @@ describe('uiScroll', function () {
 
 				angular.element(document).find('body').append(sandbox);
 
-                if(options && options.sandboxAppend) {
-                    options.sandboxAppend(scroller);
-                }
-                else {
-                    sandbox.append(scroller);
-                }
+				if(options && options.sandboxAppend) {
+					options.sandboxAppend(scroller);
+				}
+				else {
+					sandbox.append(scroller);
+				}
 
 				$compile(scroller)(scope);
 				scope.$apply();
 
-                if(!options || !options.noFlush) {
-                    $timeout.flush();
-                }
+				if(!options || !options.noFlush) {
+					$timeout.flush();
+				}
 
 				runTest($window, sandbox);
 
@@ -152,9 +152,9 @@ describe('uiScroll', function () {
 						expect($.fn.unbind.calls[2].args[0]).toBe('mousewheel');
 						expect($.fn.unbind.calls[2].object.prevObject[0]).toBe($window);
 					},
-                    {
-                      noFlush: true //empty data-set; nothing to render
-                    }
+					{
+						noFlush: true //empty data-set; nothing to render
+					}
 				);
 			});
 
@@ -172,8 +172,8 @@ describe('uiScroll', function () {
 						expect(angular.element(bottomPadding).css('height')).toBe('0px');
 
 					}, null, {
-                        noFlush: true
-                    }
+						noFlush: true
+					}
 				);
 			});
 
@@ -189,8 +189,8 @@ describe('uiScroll', function () {
 						expect(spy.calls[1].args[0]).toBe(-9);
 
 					}, null, {
-                        noFlush: true
-                    }
+						noFlush: true
+					}
 				);
 			});
 		}

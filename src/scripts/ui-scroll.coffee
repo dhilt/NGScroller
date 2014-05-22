@@ -354,10 +354,9 @@ angular.module('ui.scroll', [])
 						viewport.bind 'scroll', scrollHandler
 
 						wheelHandler = (e) ->
-							return true if (bof and viewport[0].scrollTop is 0) or
-							(eof and viewport[0].scrollTop is (viewport[0].scrollHeight - viewport[0].offsetHeight))
-							e.preventDefault()
-							e.stopPropagation()
+							if !(bof and viewport[0].scrollTop is 0) and !(eof and viewport[0].scrollTop is (viewport[0].scrollHeight - viewport[0].offsetHeight))
+								e.preventDefault()
+								e.stopPropagation()
 
 						viewport.parent().bind 'mousewheel', wheelHandler
 

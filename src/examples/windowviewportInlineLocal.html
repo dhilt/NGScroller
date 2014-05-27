@@ -7,6 +7,9 @@
     <script src="../../build/scripts/ui-scroll-display-trick.js"></script>
     <script src="../../build/scripts/ui-scroll-jqlite.js"></script>
     <script src="../../build/scripts/windowviewportInline.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+	<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <style>
         span {
             display: inline-block;
@@ -17,7 +20,7 @@
 <script>
     (function () {
 
-        window.testStand = {
+        window.inlineDemo = {
             items: {},
             minX: 100,
             maxX: 150,
@@ -69,7 +72,7 @@
 
         };
 
-        testStand.initialize();
+        inlineDemo.initialize();
 
     })();
 </script>
@@ -84,13 +87,15 @@
     text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>
     text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>
 
-    <div ui-scroll-viewport style="width: 400px; height: 300px; display: block; background-color: white;">
-        <span ui-scroll="item in datasource" top-visible="topItem" is-loading="loading">
-            <span style="width: {{item.width}}px; height: {{item.height}}px; background-color: {{item.color}}">
-            *{{item.content}}*
-            </span>
-        </span>
-    </div>
+	<div style="width: 400px; height: 300px; display: block; background-color: white;">
+		<div ui-scroll-viewport class="well" style="width: 400px; height: 300px;">
+			<span ui-scroll="item in datasource" top-visible="topItem" is-loading="loading">
+				<span style="width: {{item.width}}px; height: {{item.height}}px; background-color: {{item.color}}">
+				*{{item.content}}*
+				</span>
+			</span>
+		</div>
+	</div>
 
     text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>
     text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>

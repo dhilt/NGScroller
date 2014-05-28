@@ -52,7 +52,7 @@ angular.module('ui.scroll', [])
 							throw new Error "#{datasourceName} is not a valid datasource" unless isDatasource datasource
 
 						bufferSize = Math.max(3, +$attr.bufferSize || 10)
-						bufferPadding = -> viewport.outerHeight() * Math.max(0.1, +$attr.padding || 0.1) # some extra space to initate preload
+						bufferPadding = -> viewport.height() * Math.max(0.1, +$attr.padding || 0.1) # some extra space to initate preload
 
 						scrollHeight = (elem)->
 							elem[0].scrollHeight ? elem[0].document.documentElement.scrollHeight
@@ -166,7 +166,7 @@ angular.module('ui.scroll', [])
 							adjustBuffer(ridActual, false)
 
 						bottomVisiblePos = ->
-							viewport.scrollTop() + viewport.outerHeight()
+							viewport.scrollTop() + viewport.height()
 
 						topVisiblePos = ->
 							viewport.scrollTop()
@@ -383,7 +383,7 @@ angular.module('ui.scroll', [])
 
 						wheelHandler = (event) ->
 							scrollTop = viewport[0].scrollTop
-							yMax = viewport[0].scrollHeight - viewport[0].clientHeight
+							yMax = viewport[0].scrollHeight - viewport[0].offsetHeight
 							if (scrollTop is 0 and not bof) or (scrollTop is yMax and not eof)
 								event.preventDefault()
 

@@ -384,7 +384,7 @@ angular.module('ui.scroll', [])
 						wheelHandler = (event) ->
 							scrollTop = viewport[0].scrollTop
 							yMax = viewport[0].scrollHeight - viewport[0].clientHeight
-							if (scrollTop <= 0 and not bof) or (scrollTop >= yMax and not eof)
+							if (scrollTop is 0 and not bof) or (scrollTop is yMax and not eof)
 								event.preventDefault()
 
 						viewport.bind 'mousewheel', wheelHandler

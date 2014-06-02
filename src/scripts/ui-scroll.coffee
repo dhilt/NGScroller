@@ -71,7 +71,7 @@ angular.module('ui.scroll', [])
 							isCached = true
 							itemsForCallback = []
 
-							for i in [from...from + count - 1]
+							for i in [from...from + count] by 1
 								if !cache.hasOwnProperty(i)
 									continue if (borderLast isnt null and i > borderLast) or (borderFirst isnt null and i < borderFirst) # out of available data
 									isCached = false

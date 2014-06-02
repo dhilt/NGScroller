@@ -60,7 +60,10 @@ angular.module('ui.scroll', [])
 							elem[0].scrollHeight ? elem[0].document.documentElement.scrollHeight
 
 						adapter = null
+
 						cache = {}
+						borderFirst = null
+						borderLast = null
 
 						getData = (from, count, resultCallback) ->
 							return datasource.get(from, count, resultCallback) if !isCacheEnabled
@@ -70,6 +73,7 @@ angular.module('ui.scroll', [])
 
 							for i in [from...from + count - 1]
 								if !cache.hasOwnProperty(i)
+									continue if (borderLast isnt null and i > borderLast) or (borderFirst isnt null and i < borderFirst) # out of available data
 									isCached = false
 									break
 								itemsForCallback.push cache[i]
@@ -364,6 +368,7 @@ angular.module('ui.scroll', [])
 												cache[next] = item if isCacheEnabled and not isFromCache
 												newItems.push (insert ++next, item)
 											#log "appended: requested #{bufferSize} received #{result.length} buffer size #{buffer.length} first #{first} next #{next}"
+										borderLast = next - 1 if eof
 										finalize(rid, scrolling, newItems)
 							else
 								if buffer.length && !shouldLoadTop()
@@ -384,6 +389,7 @@ angular.module('ui.scroll', [])
 												newItems.unshift (insert --first, result[i])
 												cache[first] = result[i] if isCacheEnabled and not isFromCache
 											#log "prepended: requested #{bufferSize} received #{result.length} buffer size #{buffer.length} first #{first} next #{next}"
+										borderFirst = first if bof
 										finalize(rid, scrolling, newItems)
 
 						resizeHandler = ->

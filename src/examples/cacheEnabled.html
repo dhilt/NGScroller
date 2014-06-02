@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Scroller Demo (cache option) </title>
+    <script src="http://coffeescript.org/extras/coffee-script.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.5/angular.js"></script>
+    <script src="../scripts/ui-scroll.coffee" type="text/coffeescript"></script>
+    <script src="../scripts/ui-scroll-jqlite.coffee" type="text/coffeescript"></script>
+    <script src="customviewport.coffee" type="text/coffeescript"></script>
+</head>
+<body>
+
+<div style="float: left; width: 400px; ">
+	<h2> Cache is enabled </h2>
+	<div ui-scroll-viewport style="height:200px; width: 200px; ">
+		<div ui-scroll="item in datasource" buffer-size='4' cache-enable="true">*{{item}}*</div>
+	</div>
+</div>
+
+<div style="float: left; width: 400px; ">
+	<h2> Cache is disabled (default) </h2>
+	<div ui-scroll-viewport style="height:200px; width: 200px; ">
+		<div ui-scroll="item in datasource" buffer-size='4' cache-enable="false">*{{item}}*</div>
+	</div>
+</div>
+
+<div style="clear: both;"></div>
+
+</body>
+</html>

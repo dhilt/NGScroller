@@ -4,16 +4,13 @@
     <meta charset="utf-8">
     <title>Scroller Demo (entire window)</title>
     <script src="../../build/scripts/angular.js"></script>
-    <script src="../../build/scripts/ui-scroll.js"></script>
+    <script src="../../build/scripts/ui-scroll-dev.js"></script>
     <script src="../../build/scripts/ui-scroll-jqlite.js"></script>
-    <script src="../../build/scripts/windowviewportInline.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-	<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="../../build/scripts/localDevelopment.js"></script>
     <style>
-        span {
-            display: inline-block;
-        }
+		span {
+			display: inline-block;
+		}
     </style>
 </head>
 <body id="body">
@@ -84,13 +81,13 @@
     text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>
     text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>
 
-	<div style="width: 400px; height: 300px; display: block; background-color: white;">
-		<div ui-scroll-viewport class="well" style="width: 800px; height: 300px;">
-			<span ui-scroll="item in datasource" top-visible="topItem" is-loading="loading">
-				<span style="width: {{item.width}}px; height: {{item.height}}px; background-color: {{item.color}}">
+	<div style="width: 800px; height: 300px; display: block; background-color: white;">
+		<div ui-scroll-viewport style="width: 800px; height: 300px;">
+			<div ui-scroll="item in datasource" top-visible="topItem" is-loading="loading" cache-enable="true" buffer-size="1">
+				<div style="width: {{item.width}}px; height: {{item.height}}px; background-color: {{item.color}}">
 				*{{item.content}}*
-				</span>
-			</span>
+				</div>
+			</div>
 		</div>
 	</div>
 

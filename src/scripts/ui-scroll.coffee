@@ -43,6 +43,8 @@ angular.module('ui.scroll', [])
 						itemName = match[1]
 						datasourceName = match[2]
 
+						isCacheEnabled = if $attr.cacheEnable and $attr.cacheEnable isnt 'false' then true else false
+
 						isDatasource = (datasource) ->
 							angular.isObject(datasource) and datasource.get and angular.isFunction(datasource.get)
 
@@ -58,6 +60,21 @@ angular.module('ui.scroll', [])
 							elem[0].scrollHeight ? elem[0].document.documentElement.scrollHeight
 
 						adapter = null
+						cache = {}
+
+						getData = (from, count, resultCallback) ->
+							return datasource.get(from, count, resultCallback) if !isCacheEnabled
+
+							isCached = true
+							itemsForCallback = []
+
+							for i in [from...from + count - 1]
+								if !cache.hasOwnProperty(i)
+									isCached = false
+									break
+								itemsForCallback.push cache[i]
+
+							if isCached then resultCallback(itemsForCallback, true) else datasource.get(from, count, resultCallback)
 
 						# Calling linker is the only way I found to get access to the tag name of the template
 						# to prevent the directive scope from pollution a new scope is created and destroyed
@@ -333,8 +350,8 @@ angular.module('ui.scroll', [])
 									finalize(rid, scrolling)
 								else
 									#log "appending... requested #{bufferSize} records starting from #{next}"
-									datasource.get next, bufferSize,
-									(result) ->
+									getData next, bufferSize,
+									(result, isFromCache) ->
 										return if rid and rid isnt ridActual
 										newItems = []
 										if result.length < bufferSize
@@ -344,6 +361,7 @@ angular.module('ui.scroll', [])
 										if result.length > 0
 											clipTop()
 											for item in result
+												cache[next] = item if isCacheEnabled and not isFromCache
 												newItems.push (insert ++next, item)
 											#log "appended: requested #{bufferSize} received #{result.length} buffer size #{buffer.length} first #{first} next #{next}"
 										finalize(rid, scrolling, newItems)
@@ -352,8 +370,8 @@ angular.module('ui.scroll', [])
 									finalize(rid, scrolling)
 								else
 									#log "prepending... requested #{size} records starting from #{start}"
-									datasource.get first-bufferSize, bufferSize,
-									(result) ->
+									getData first-bufferSize, bufferSize,
+									(result, isFromCache) ->
 										return if rid and rid isnt ridActual
 										newItems = []
 										if result.length < bufferSize
@@ -364,6 +382,7 @@ angular.module('ui.scroll', [])
 											clipBottom() if buffer.length
 											for i in [result.length-1..0]
 												newItems.unshift (insert --first, result[i])
+												cache[first] = result[i] if isCacheEnabled and not isFromCache
 											#log "prepended: requested #{bufferSize} received #{result.length} buffer size #{buffer.length} first #{first} next #{next}"
 										finalize(rid, scrolling, newItems)
 

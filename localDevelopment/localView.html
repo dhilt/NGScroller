@@ -7,99 +7,28 @@
     <script src="out/ui-scroll-dev.js"></script>
     <script src="out/ui-scroll-jqlite.js"></script>
     <script src="localCtrl.js"></script>
-    <style>
-		span {
-			display: inline-block;
-		}
-    </style>
 </head>
 <body ng-controller="localCtrl">
-<script>
-    (function () {
 
-        window.inlineDemo = {
-            items: {},
-            minX: 100,
-            maxX: 150,
-            minY: 35,
-            maxY: 100,
-            defaultWidth: 100,
-            defaultHeight: 50,
-            defaultColor: '#ffffe0',
-            defaultColorOdd: '#e0ffff',
-            isLighter: true,
+	<style>
+		a.toggler {
+			cursor: pointer;
+			color: #750000;
+			font-weight: normal;
+		}
+		a.toggler:hover {
+			color: red;
+		}
+	</style>
 
-            getWidth: function (index) {
-                if (this.items['n' + index] !== undefined) {
-                    return this.items['n' + index].width;
-                }
-                return this.defaultWidth;
-            },
+	<h2>
+		Cache is {{datasource.cache.isEnabled ? 'enabled' : 'disabled'}}
+		<a class="toggler" ng-click="datasource.cache.toggle()">[toggle]</a>
+	</h2>
 
-            getHeight: function (index) {
-                if (this.items['n' + index] !== undefined) {
-                    return this.items['n' + index].height;
-                }
-                return this.defaultHeight;
-            },
-
-            getColor: function (index) {
-                if (this.items['n' + index] !== undefined) {
-                    return this.items['n' + index].color;
-                }
-                return index % 2 === 0 ? this.defaultColor : this.defaultColorOdd;
-            },
-
-            initialize: function () {
-                var i, j, color, letters = '0123456789ABCDEF'.split('');
-
-                for (i = -100; i < 100; i++) {
-                    this.items['n' + i] = {};
-                    this.items['n' + i].width = Math.floor((Math.random() * (this.maxX - this.minX + 1)) + this.minX);
-                    this.items['n' + i].height = Math.floor((Math.random() * (this.maxY - this.minY + 1)) + this.minY);
-
-                    for (j = 0, color = '#'; j < 6; j++) {
-                        var minColor = this.isLighter ? 10 : 0;
-                        color += letters[Math.floor(Math.random() * (15 - minColor + 1)) + minColor];
-                    }
-
-                    this.items['n' + i].color = color;
-                }
-            }
-
-        };
-
-        inlineDemo.initialize();
-
-    })();
-</script>
-
-<h2 style="position: fixed; left: 150px; top: 0;"> is loading: {{loading}}; </h2>
-
-<div style="width: 800px; background-color: rgba(255, 249, 0, 0.28); ">
-
-    <button ng-click="datasource.cache.toggle()">Cache is {{datasource.cache.isEnabled ? 'enabled' : 'disabled'}}</button>
-
-    text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>
-    text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>
-
-	<div style="width: 800px; height: 300px; display: block; background-color: white;">
-		<div ui-scroll-viewport style="width: 800px; height: 300px;">
-			<div ui-scroll="item in datasource" is-loading="loading" buffer-size="1">
-				<div style="width: {{item.width}}px; height: {{item.height}}px; background-color: {{item.color}}">
-				*{{item.content}}*
-				</div>
-			</div>
-		</div>
+	<div ui-scroll-viewport style="height:300px; width: 200px; ">
+		<div ui-scroll="item in datasource" buffer-size='5'>*{{item}}*</div>
 	</div>
-
-    text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>
-    text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>
-    text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>
-    text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>
-    text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>text<br>
-
-</div>
 
 </body>
 </html>

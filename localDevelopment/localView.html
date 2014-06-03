@@ -22,12 +22,12 @@
 	</style>
 
 	<h2>
-		Cache is {{datasourceCache.isEnabled ? 'enabled' : 'disabled'}}
-		<a class="toggler" ng-click="datasourceCache.toggle()">[toggle]</a>
+		Cache is {{datasource.cache.isEnabled ? 'enabled' : 'disabled'}}
+		<a class="toggler" ng-click="datasource.cache.toggle()">[toggle]</a>
 	</h2>
 
 	<div ui-scroll-viewport style="height:300px; width: 200px; ">
-		<div ui-scroll="item in datasourceCache" buffer-size='5'>*{{item}}*</div>
+		<div ui-scroll="item in datasource" buffer-size='5'>*{{item}}*</div>
 	</div>
 
 </body>

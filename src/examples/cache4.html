@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html ng-app="application">
 <head>
     <meta charset="utf-8">
     <title>Scroller Demo (cache option) </title>
@@ -21,8 +21,7 @@
 	</style>
 
 </head>
-<body ng-app="application">
-<div  ng-controller="mainController">
+<body ng-controller="mainController">
 
 <!--h2>
 	Cache is {{datasource.cache.isEnabled ? 'enabled' : 'disabled'}}
@@ -33,6 +32,6 @@
 <div ui-scroll-viewport style="height:300px; width: 200px; ">
 	<div ui-scroll="item in datasource" buffer-size='5'>*{{item.content}}*</div>
 </div>
-</div>
+
 </body>
 </html>

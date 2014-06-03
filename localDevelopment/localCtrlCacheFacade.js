@@ -61,8 +61,6 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mai
 
 
 		datasource.get = function (index, count, success) {
-			var self = this;
-
 			return $timeout(function () {
 				var i, item, result, _i, _ref;
 				result = [];

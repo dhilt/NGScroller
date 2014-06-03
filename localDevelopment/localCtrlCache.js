@@ -36,7 +36,7 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mai
 					}
 					result.push(this.items[i]);
 				}
-				
+
 				success(result);
 				return true;
 			}
@@ -69,5 +69,3 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mai
 	}
 
 ]);
-
-angular.bootstrap(document, ["application"]);

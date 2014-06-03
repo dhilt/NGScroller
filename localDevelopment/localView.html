@@ -6,7 +6,7 @@
     <script src="out/angular.js"></script>
     <script src="out/ui-scroll.js"></script>
     <script src="out/ui-scroll-jqlite.js"></script>
-    <script src="localCtrlCache.js"></script>
+    <script src="localCtrlCacheFacade.js"></script>
 </head>
 <body ng-controller="mainController">
 
@@ -22,12 +22,12 @@
 	</style>
 
 	<h2>
-		Cache is {{datasource.cache.isEnabled ? 'enabled' : 'disabled'}}
-		<a class="toggler" ng-click="datasource.cache.toggle()">[toggle]</a>
+		Cache is {{datasourceCache.isEnabled ? 'enabled' : 'disabled'}}
+		<a class="toggler" ng-click="datasourceCache.toggle()">[toggle]</a>
 	</h2>
 
 	<div ui-scroll-viewport style="height:300px; width: 200px; ">
-		<div ui-scroll="item in datasource" buffer-size='5'>*{{item}}*</div>
+		<div ui-scroll="item in datasourceCache" buffer-size='5'>*{{item}}*</div>
 	</div>
 
 </body>

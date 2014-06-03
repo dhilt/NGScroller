@@ -1,6 +1,5 @@
 angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mainController',
 	[ '$scope', '$log', '$timeout'
-
 		($scope, console, $timeout)->
 
 			datasource = {}
@@ -27,7 +26,7 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mai
 						if not this.items.hasOwnProperty(i)
 							isCached = false
 							return
-					result.push(this.items[i])
+						result.push(this.items[i])
 
 					success(result)
 					return true
@@ -38,7 +37,7 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mai
 
 				return if self.cache and self.cache.get(index, count, success)
 
-				$timeout(->
+				$timeout () ->
 					result = []
 
 					for i in [index..index + count - 1]
@@ -48,8 +47,7 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mai
 						self.cache.saveItem(item, i) if self.cache
 
 					success(result)
-					100
-				)
+				, 100
 
 			$scope.datasource = datasource
 

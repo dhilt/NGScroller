@@ -4,11 +4,12 @@
 	<meta charset="utf-8">
 	<title>Scroller Demo (entire window)</title>
 	<script src="out/angular.js"></script>
-	<script src="out/ui-scroll-dev.js"></script>
+	<script src="out/ui-scroll.js"></script>
 	<script src="out/ui-scroll-jqlite.js"></script>
-	<script src="localCtrl.js"></script>
+	<!--script src="localCtrl.js"></script-->
+	<script src="localService.js"></script>
 </head>
-<body ng-controller="mainController">
+<body ng-controller2="mainController">
 
 <style>
 	a.toggler {
@@ -34,7 +35,7 @@
 	</h2>
 
 	<div ui-scroll-viewport style="height:300px; width: 200px; ">
-		<div ui-scroll="item in datasource" buffer-size='5'>*{{item.content}}*</div>
+		<div ui-scroll="item in datasource.with.dot" buffer-size='5'>*{{item.content}}*</div>
 	</div>
 </div>
 

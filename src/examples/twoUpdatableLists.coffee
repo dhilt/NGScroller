@@ -30,7 +30,7 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mai
 					$scope.firstListProcessing.update (scope) ->
 						scope.item.content += ' upd';
 
-				$scope.updateList1 = () ->
+				$scope.updateList2 = () ->
 					$scope.second.list.processing.update (scope) ->
 						scope.item.content += ' upd';
 

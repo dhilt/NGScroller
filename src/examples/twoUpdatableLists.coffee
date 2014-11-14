@@ -39,5 +39,5 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mai
 angular.bootstrap(document, ["application"])
 
 ###
-//# sourceURL=src/scripts/scopeDatasource.js
+//# sourceURL=src/scripts/twoUpdatableLists.js
 ###

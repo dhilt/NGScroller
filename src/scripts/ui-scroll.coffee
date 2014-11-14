@@ -412,7 +412,7 @@ angular.module('ui.scroll', [])
 							viewport.unbind 'scroll', scrollHandler
 							viewport.unbind 'mousewheel', wheelHandler
 
-						eventListener.$on "update.items", (event, locator, newItem)->
+						updateItems = (locator, newItem) ->
 							if angular.isFunction locator
 								((wrapper)->
 									locator wrapper.scope
@@ -422,7 +422,7 @@ angular.module('ui.scroll', [])
 									buffer[locator-first-1].scope[itemName] = newItem
 							null
 
-						eventListener.$on "delete.items", (event, locator)->
+						deleteItems = (locator) ->
 							if angular.isFunction locator
 								temp = []
 								temp.unshift item for item in buffer
@@ -439,7 +439,7 @@ angular.module('ui.scroll', [])
 							item.scope.$index = first + i for item,i in buffer
 							adjustBuffer(null, false)
 
-						eventListener.$on "insert.item", (event, locator, item)->
+						insertItems = (locator, item) ->
 							inserted = []
 							if angular.isFunction locator
 #								temp = []
@@ -462,6 +462,17 @@ angular.module('ui.scroll', [])
 
 							item.scope.$index = first + i for item,i in buffer
 							adjustBuffer(null, false, inserted)
+
+						eventListener.$on "update.items", (event, locator, newItem)-> updateItems(locator, newItem)
+						eventListener.$on "delete.items", (event, locator)-> deleteItems(locator)
+						eventListener.$on "insert.item", (event, locator, item)-> insertItems(locator, item)
+
+						processing = $attr.processing
+						processing = getValueChain($scope, processing)
+						if processing and angular.isObject(processing)
+							processing.update = updateItems
+							processing.insert = insertItems
+							processing.delete = updateItems
 
 		])
 

@@ -665,24 +665,4 @@ describe('uiScroll', function () {
         });
     });
 
-
-
-	describe('datasource deep within scope', function () {
-
-		var html = '<div ui-scroll="item in sub.AnotherDatasource">{{$index}}: {{item}}</div>';
-
-		it('should fail because of no datasource', function() {
-			try {
-				runTest(html,
-					function($window, sandbox) {
-						expect(sandbox.children().length).toBe(5);
-					}
-				)
-			}
-			catch (e) {
-				expect(e.message).toBe('Chain walk error: can\'t find "sub" property within "sub.AnotherDatasource" chain');
-			}
-		});
-	});
-
 });

@@ -16,6 +16,26 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mai
 		};
 
 		$scope.datasource = datasource;
+
+		$scope.firstListProcessing = {};
+		$scope.second = {
+			list: {
+				processing: {}
+			}
+		};
+
+		$scope.updateList1 = function () {
+			$scope.firstListProcessing.update(function (scope) {
+				scope.item.content += ' upd';
+			});
+		};
+
+		$scope.updateList2 = function () {
+			$scope.second.list.processing.update(function (scope) {
+				scope.item.content += ' upd';
+			});
+		};
+
 	}
 ]);
 

@@ -1,5 +1,5 @@
-angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mainController', [
-	'$scope', '$log', '$timeout', function ($scope, console, $timeout) {
+angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).factory('datasource.with.dot', [
+	'$log', '$timeout', function (console, $timeout) {
 		var datasource = {};
 
 		datasource.get = function (index, count, success) {
@@ -15,10 +15,7 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mai
 			}, 100);
 		};
 
-		this.datasource = datasource;
-
-		this.demoText = "Hello!!"
-
+		return datasource;
 	}
 ]);
 

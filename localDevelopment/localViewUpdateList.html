@@ -1,0 +1,78 @@
+<!doctype html>
+<html ng-app="application">
+<head>
+	<meta charset="utf-8">
+	<title>Scroller Demo (entire window)</title>
+	<script src="out/angular.js"></script>
+	<script src="out/ui-scroll-dev.js"></script>
+	<script src="out/ui-scroll-jqlite.js"></script>
+	<script src="localCtrlUpdateList.js"></script>
+</head>
+<body ng-controller="mainController">
+
+<style>
+	a.toggler {
+		cursor: pointer;
+		color: #750000;
+		font-weight: normal;
+	}
+
+	a.toggler:hover {
+		color: red;
+	}
+
+	.note {
+		margin-left: 40px;
+		margin-top: 65px;
+	}
+
+	button {
+		margin-top: 15px;
+	}
+</style>
+
+
+<div style="float: left;">
+	<h2>
+		Local demo
+	</h2>
+
+	<table>
+		<tr>
+			<td>
+				<div ui-scroll-viewport style="height:300px; width: 200px;">
+					<div ui-scroll="item in datasource"
+						 processing="firstListProcessing"
+						 buffer-size='5'>{{item.content}}</div>
+				</div>
+				<button ng-click="updateList1()">update list 1</button>
+			</td>
+			<td>
+				<div style="margin-left: 30px;">
+					<div ui-scroll-viewport style="height:300px; width: 200px; ">
+						<div ui-scroll="item in datasource"
+							 processing="second.list.processing"
+							 buffer-size='5'>{{item.content}}</div>
+					</div>
+					<button ng-click="updateList2()">update list 2</button>
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>
+
+<div style="float: left;" class="note">
+	<p>
+		Here is my local demo
+	</p>
+
+	<p>
+		(c) dhilt, 2014
+	</p>
+</div>
+
+<div style="clear: both;"></div>
+
+
+</body>
+</html>

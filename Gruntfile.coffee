@@ -115,7 +115,7 @@ module.exports = (grunt) ->
 	]
 
 	grunt.registerTask 'build', [
-		'jshint:test'
+		'jshint:test',
 		'karma:travis',
 		'coffee:build',
 		'concat',

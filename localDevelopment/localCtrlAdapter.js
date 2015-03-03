@@ -33,13 +33,9 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mai
 
 		$scope.removeFromList1 = function() {
 			return $scope.firstListAdapter.applyUpdates(function(item, scope) {
-				if (scope.$index === 2) {
-					return [];
-				}
-				/*return;
 				if (scope.$index % 2 === 0) {
 					return [];
-				}*/
+				}
 			});
 		};
 
@@ -60,26 +56,35 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mai
 		};
 
 
+
 		$scope.updateList2 = function() {
-			return $scope.second.list.adapter.update(function(scope) {
-				return scope.item.content += ' *';
+			return $scope.second.list.adapter.applyUpdates(function(item, scope) {
+				return item.content += " *";
 			});
 		};
 
 		$scope.removeFromList2 = function() {
-			$scope.second.list.adapter["delete"](function(scope) {
-				return scope.item.id % 2 !== 0;
+			return $scope.second.list.adapter.applyUpdates(function(item, scope) {
+				if (scope.$index % 2 !== 0) {
+					return [];
+				}
 			});
 		};
 
 		idList2 = 2000;
 
 		$scope.addToList2 = function() {
-			$scope.second.list.adapter.insert(4, {
-				id: idList2,
-				content: 'a new one #' + idList2
+			return $scope.second.list.adapter.applyUpdates(function(item, scope) {
+				var newItem;
+				if (scope.$index === 4) {
+					newItem = {
+						id: idList2,
+						content: 'a new one #' + idList1
+					};
+					idList2++;
+					return [item, newItem];
+				}
 			});
-			idList2++;
 		};
 
 	}

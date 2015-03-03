@@ -46,11 +46,12 @@
 			<td>
 				<div class="dataLoading">
 					<span ng-hide="!firstListAdapter.isLoading">...data loading...</span>
-					<span ng-hide="firstListAdapter.isLoading">1st list is loaded</span>
+					<span ng-hide="isLoadingOnScope">1st list is loaded</span>
 				</div>
 				<div ui-scroll-viewport class="viewport">
 					<div ui-scroll="item in datasource"
 						 adapter="firstListAdapter"
+						 is-loading="isLoadingOnScope"
 						 buffer-size='5'>{{item.content}}</div>
 				</div>
 				<button ng-click="updateList1()">update this list</button>

@@ -68,9 +68,6 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 					if ($attr.adapter) {
 						adapterAttr = getValueChain($scope, $attr.adapter, true);
 					}
-					if ($attr.isLoading) {
-						isLoadingAttr = getValueChain($scope, $attr.isLoading, true);
-					}
 					bufferSize = Math.max(3, +$attr.bufferSize || 10);
 					bufferPadding = function() {
 						return viewport.outerHeight() * Math.max(0.1, +$attr.padding || 0.1);
@@ -179,7 +176,7 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 					loading = function(value) {
 						adapter.isLoading = value;
 						if ($attr.isLoading) {
-							isLoadingAttr = value;
+							viewportScope[$attr.isLoading] = value;
 						}
 						if (typeof datasource.loading === 'function') {
 							return datasource.loading(value);

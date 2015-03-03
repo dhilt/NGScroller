@@ -30,7 +30,7 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 			terminal: true,
 			compile: function(elementTemplate, attr, linker) {
 				return function($scope, element, $attr, controllers) {
-					var adapter, adapterAttr, adjustBuffer, adjustRowHeight, applyUpdate, bof, bottomVisiblePos, buffer, bufferPadding, bufferSize, builder, clipBottom, clipTop, datasource, datasourceName, doAdjustment, doDelete, doInsert, doUpdate, enqueueFetch, eof, eventListener, fetch, finalize, first, getValueChain, hideElementBeforeAppend, insert, isDatasource, isLoading, itemName, loading, log, match, next, pending, reload, removeFromBuffer, resizeAndScrollHandler, ridActual, scrollHeight, shouldLoadBottom, shouldLoadTop, showElementAfterRender, topVisible, topVisibleElement, topVisibleItem, topVisiblePos, topVisibleScope, viewport, viewportScope, wheelHandler;
+					var adapter, adapterAttr, adjustBuffer, adjustRowHeight, applyUpdate, bof, bottomVisiblePos, buffer, bufferPadding, bufferSize, builder, clipBottom, clipTop, datasource, datasourceName, doAdjustment, doDelete, doInsert, doUpdate, enqueueFetch, eof, eventListener, fetch, finalize, first, getValueChain, hideElementBeforeAppend, insert, isDatasource, isLoadingAttr, itemName, loading, log, match, next, pending, reload, removeFromBuffer, resizeAndScrollHandler, ridActual, scrollHeight, shouldLoadBottom, shouldLoadTop, showElementAfterRender, topVisible, topVisibleElement, topVisibleItem, topVisiblePos, topVisibleScope, viewport, viewportScope, wheelHandler;
 					log = console.debug || console.log;
 					match = $attr.uiScroll.match(/^\s*(\w+)\s+in\s+([\w\.]+)\s*$/);
 					if (!match) {
@@ -68,6 +68,9 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 					if ($attr.adapter) {
 						adapterAttr = getValueChain($scope, $attr.adapter, true);
 					}
+					if ($attr.isLoading) {
+						isLoadingAttr = getValueChain($scope, $attr.isLoading, true);
+					}
 					bufferSize = Math.max(3, +$attr.bufferSize || 10);
 					bufferPadding = function() {
 						return viewport.outerHeight() * Math.max(0.1, +$attr.padding || 0.1);
@@ -77,7 +80,6 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 						return (_ref = elem[0].scrollHeight) != null ? _ref : elem[0].document.documentElement.scrollHeight;
 					};
 					builder = null;
-					adapter = {};
 					linker($scope.$new(), function(template) {
 						var bottomPadding, createPadding, padding, repeaterType, topPadding, viewport;
 						repeaterType = template[0].localName;
@@ -174,20 +176,15 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 							return datasource.topVisible(item);
 						}
 					};
-					if (angular.isDefined($attr.isLoading)) {
-						loading = function(value) {
-							viewportScope[$attr.isLoading] = value;
-							if (datasource.loading) {
-								return datasource.loading(value);
-							}
-						};
-					} else {
-						loading = function(value) {
-							if (datasource.loading) {
-								return datasource.loading(value);
-							}
-						};
-					}
+					loading = function(value) {
+						adapter.isLoading = value;
+						if ($attr.isLoading) {
+							isLoadingAttr = value;
+						}
+						if (typeof datasource.loading === 'function') {
+							return datasource.loading(value);
+						}
+					};
 					ridActual = 0;
 					first = 1;
 					next = 1;
@@ -195,7 +192,6 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 					pending = [];
 					eof = false;
 					bof = false;
-					isLoading = false;
 					removeFromBuffer = function(start, stop) {
 						var i, _i;
 						for (i = _i = start; start <= stop ? _i < stop : _i > stop; i = start <= stop ? ++_i : --_i) {
@@ -291,8 +287,7 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 						}
 					};
 					enqueueFetch = function(rid, direction) {
-						if (!isLoading) {
-							isLoading = true;
+						if (!adapter.isLoading) {
 							loading(true);
 						}
 						if (pending.push(direction) === 1) {
@@ -419,7 +414,6 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 						return adjustBuffer(rid, newItems, function() {
 							pending.shift();
 							if (pending.length === 0) {
-								isLoading = false;
 								return loading(false);
 							} else {
 								return fetch(rid);
@@ -481,7 +475,7 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 						}
 					};
 					resizeAndScrollHandler = function() {
-						if (!$rootScope.$$phase && !isLoading) {
+						if (!$rootScope.$$phase && !adapter.isLoading) {
 							adjustBuffer();
 							return $scope.$apply();
 						}
@@ -514,6 +508,7 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 						viewport.unbind('scroll', resizeAndScrollHandler);
 						return viewport.unbind('mousewheel', wheelHandler);
 					});
+					adapter = {};
 					applyUpdate = function(wrapper, newItems) {
 						var i, inserted, item, ndx, newItem, oldItemNdx, _i, _j, _k, _len, _len1, _len2;
 						inserted = [];
@@ -570,8 +565,10 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 						}
 						return adjustBuffer(ridActual, inserted);
 					};
-					if (adapterAttr) {
+					adapter.isLoading = false;
+					if ($attr.adapter) {
 						angular.extend(adapterAttr, adapter);
+						adapter = adapterAttr;
 					}
 					doUpdate = function(locator, newItem) {
 						var wrapper, _fn, _i, _len, _ref;
@@ -651,8 +648,3 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 		};
 	}
 ]);
-
-
-/*
- //# sourceURL=src/scripts/ui-scroll.js
- */

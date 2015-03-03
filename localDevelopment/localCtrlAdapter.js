@@ -13,14 +13,13 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mai
 					result.push(item);
 				}
 				return success(result);
-			}, 100);
+			}, 150);
 		};
 
 		$scope.datasource = datasource;
 
 
 		var idList1, idList2;
-
 
 		$scope.firstListAdapter = {
 			remain: true
@@ -34,7 +33,7 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mai
 
 		$scope.removeFromList1 = function() {
 			return $scope.firstListAdapter.applyUpdates(function(item, scope) {
-				if (item.id === 2) {
+				if (scope.$index === 2) {
 					return [];
 				}
 				/*return;

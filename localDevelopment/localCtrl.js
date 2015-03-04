@@ -5,9 +5,11 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mai
 		datasource.get = function (index, count, success) {
 			return $timeout(function () {
 				var i, item, result, _i, _ref;
+				var a = $scope;
 				result = [];
 				for (i = _i = index, _ref = index + count - 1; index <= _ref ? _i <= _ref : _i >= _ref; i = index <= _ref ? ++_i : --_i) {
 					item = {};
+					item.id = i;
 					item.content = "item #" + i;
 					result.push(item);
 				}
@@ -15,9 +17,20 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite']).controller('mai
 			}, 100);
 		};
 
-		this.datasource = datasource;
+		$scope.datasource = datasource;
 
-		this.demoText = "Hello!!"
+		$scope.trololo = {};
+		$scope.trololo.tolololo = {};
+		$scope.is = {
+			loading: {
+				on: {
+					remain: true,
+					scope: 777
+				}
+			}
+		};
+
+		$scope.demoText = "Hello!!"
 
 	}
 ]);

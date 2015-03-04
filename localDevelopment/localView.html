@@ -2,34 +2,30 @@
 <html ng-app="application">
 <head>
 	<meta charset="utf-8">
-	<title>Scroller Demo (entire window)</title>
+	<title>Scroller Demo</title>
 	<script src="out/angular.js"></script>
-	<script src="out/ui-scroll-dev.js"></script>
+	<script src="out/ui-scroll.js"></script>
 	<script src="out/ui-scroll-jqlite.js"></script>
 	<script src="localCtrl.js"></script>
+
+	<style>
+		.note {
+			margin-left: 40px;
+			margin-top: 65px;
+		}
+
+		.dataLoading {
+			margin-top: -10px;
+			margin-bottom: 10px;
+		}
+
+		button {
+			margin-top: 15px;
+		}
+	</style>
 </head>
-<body ng-controller="mainController as mainCtrl">
 
-<style>
-	a.toggler {
-		cursor: pointer;
-		color: #750000;
-		font-weight: normal;
-	}
-
-	a.toggler:hover {
-		color: red;
-	}
-
-	.note {
-		margin-left: 40px;
-		margin-top: 65px;
-	}
-
-	button {
-		margin-top: 15px;
-	}
-</style>
+<body ng-controller="mainController">
 
 
 <div style="float: left;">
@@ -37,8 +33,15 @@
 		Local demo
 	</h2>
 
+	<div class="dataLoading">
+		<span ng-hide="!main.list.adapter.isLoading">...data loading...</span>
+		<span ng-hide="is.loading.on.scope">1st list is loaded</span>
+	</div>
 	<div ui-scroll-viewport style="height:300px; width: 200px;">
-		<div ui-scroll="item in mainCtrl.datasource" buffer-size='5'>{{item.content}}</div>
+		<div ui-scroll="item in datasource"
+			 adapter="main.list.adapter"
+			 is-loading="is.loading.on.scope"
+			 buffer-size='5'>{{item.content}}</div>
 	</div>
 
 </div>

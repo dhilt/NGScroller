@@ -45,28 +45,32 @@ angular.module('ui.scroll', [])
 						itemName = match[1]
 						datasourceName = match[2]
 
-						isDatasource = (datasource) ->
-							angular.isObject(datasource) and datasource.get and angular.isFunction(datasource.get)
-
-						getValueChain = (targetScope, target, isSet) ->
+						getValueChain = (targetScope, target) ->
 							return if not targetScope
 							chain = target.match(/^([\w]+)\.(.+)$/)
+							return targetScope[target] if not chain or chain.length isnt 3
+							return getValueChain(targetScope[chain[1]], chain[2])
+
+						setValueChain = (targetScope, target, value, doNotSet) ->
+							return if not targetScope or not target
+							if not chain = target.match(/^([\w]+)\.(.+)$/)
+								return if target.indexOf('.') isnt -1
 							if not chain or chain.length isnt 3
-								return targetScope[target] = {} if isSet and not angular.isObject(targetScope[target])
-								return targetScope[target]
-							targetScope[chain[1]] = {} if isSet and not angular.isObject(targetScope[chain[1]])
-							return getValueChain(targetScope[chain[1]], chain[2], isSet)
+								return targetScope[target] = value if !angular.isObject(targetScope[target]) and !doNotSet
+								return targetScope[target] = value
+							targetScope[chain[1]] = {} if !angular.isObject(targetScope[chain[1]]) and !doNotSet
+							return setValueChain(targetScope[chain[1]], chain[2], value, doNotSet)
 
 						datasource = getValueChain($scope, datasourceName)
+						isDatasourceValid = () -> angular.isObject(datasource) and typeof datasource.get is 'function'
 
-						if !isDatasource datasource
+						if !isDatasourceValid() # then try to inject datasource as service
 							datasource = $injector.get(datasourceName)
-							throw new Error "#{datasourceName} is not a valid datasource" unless isDatasource datasource
-
-						adapterAttr = getValueChain($scope, $attr.adapter, true) if $attr.adapter
+							if !isDatasourceValid()
+								throw new Error "#{datasourceName} is not a valid datasource"
 
 						bufferSize = Math.max(3, +$attr.bufferSize || 10)
-						bufferPadding = -> viewport.outerHeight() * Math.max(0.1, +$attr.padding || 0.1) # some extra space to initate preload
+						bufferPadding = -> viewport.outerHeight() * Math.max(0.1, +$attr.padding || 0.1) # some extra space to initiate preload
 
 						scrollHeight = (elem)->
 							elem[0].scrollHeight ? elem[0].document.documentElement.scrollHeight
@@ -126,15 +130,15 @@ angular.module('ui.scroll', [])
 
 						if angular.isDefined($attr.topVisible)
 							topVisibleItem = (item)->
-								viewportScope[$attr.topVisible] = item
+								setValueChain(viewportScope, $attr.topVisible, item)
 
 						if angular.isDefined($attr.topVisibleElement)
 							topVisibleElement = (element)->
-								viewportScope[$attr.topVisibleElement] = element
+								setValueChain(viewportScope, $attr.topVisibleElement, element)
 
 						if angular.isDefined($attr.topVisibleScope)
 							topVisibleScope = (scope)->
-								viewportScope[$attr.topVisibleScope] = scope
+								setValueChain(viewportScope, $attr.topVisibleScope, scope)
 
 						topVisible = (item) ->
 							topVisibleItem(item.scope[itemName]) if topVisibleItem
@@ -144,7 +148,7 @@ angular.module('ui.scroll', [])
 
 						loading = (value) ->
 							adapter.isLoading = value
-							viewportScope[$attr.isLoading] = value if $attr.isLoading
+							setValueChain($scope, $attr.isLoading, value) if $attr.isLoading
 							datasource.loading(value) if typeof datasource.loading is 'function'
 
 						ridActual = 0
@@ -411,6 +415,7 @@ angular.module('ui.scroll', [])
 						# adapter initializing
 
 						adapter = {}
+						adapter.isLoading = false
 
 						applyUpdate = (wrapper, newItems) ->
 							inserted = []
@@ -455,11 +460,13 @@ angular.module('ui.scroll', [])
 									throw new Error "applyUpdates - #{arg1} is not a valid index or outside of range"
 							adjustBuffer(ridActual, inserted)
 
-						adapter.isLoading = false
-
 						if $attr.adapter # so we have an adapter on $scope
-							angular.extend(adapterAttr, adapter)
-							adapter = adapterAttr
+							adapterOnScope = getValueChain($scope, $attr.adapter)
+							if not adapterOnScope
+								setValueChain($scope, $attr.adapter, {})
+								adapterOnScope = getValueChain($scope, $attr.adapter)
+							angular.extend(adapterOnScope, adapter)
+							adapter = adapterOnScope
 
 
 						# update events (are deprecated since v1.1.0)

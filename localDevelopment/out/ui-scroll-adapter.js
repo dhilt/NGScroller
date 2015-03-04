@@ -553,7 +553,7 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 							}
 						} else {
 							if (arg1 % 1 === 0) {
-								if ((0 <= (_ref1 = arg - first - 1) && _ref1 < buffer.length)) {
+								if ((0 <= (_ref1 = arg1 - first - 1) && _ref1 < buffer.length)) {
 									inserted = applyUpdate(buffer[arg1 - first], arg2);
 								}
 							} else {

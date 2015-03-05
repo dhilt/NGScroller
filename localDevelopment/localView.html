@@ -41,6 +41,7 @@
 		<div ui-scroll="item in datasource"
 			 adapter="main.list.adapter"
 			 is-loading="is.loading.on.scope"
+			 top-visible="top.visible"
 			 buffer-size='5'>{{item.content}}</div>
 	</div>
 
@@ -49,10 +50,6 @@
 <div style="float: left;" class="note">
 	<p>
 		Here is my local demo
-	</p>
-
-	<p>
-		{{mainCtrl.demoText}}!
 	</p>
 
 	<p>

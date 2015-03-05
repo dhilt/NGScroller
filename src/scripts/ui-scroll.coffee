@@ -128,23 +128,14 @@ angular.module('ui.scroll', [])
 
 						viewportScope = viewport.scope() || $rootScope
 
-						if angular.isDefined($attr.topVisible)
-							topVisibleItem = (item)->
-								setValueChain(viewportScope, $attr.topVisible, item)
-
-						if angular.isDefined($attr.topVisibleElement)
-							topVisibleElement = (element)->
-								setValueChain(viewportScope, $attr.topVisibleElement, element)
-
-						if angular.isDefined($attr.topVisibleScope)
-							topVisibleScope = (scope)->
-								setValueChain(viewportScope, $attr.topVisibleScope, scope)
-
 						topVisible = (item) ->
-							topVisibleItem(item.scope[itemName]) if topVisibleItem
-							topVisibleElement(item.element) if topVisibleElement
-							topVisibleScope(item.scope) if topVisibleScope
-							datasource.topVisible(item) if datasource.topVisible
+							adapter.topVisible = item.scope[itemName]
+							adapter.topVisibleElement = item.element
+							adapter.topVisibleScope = item.scope
+							setValueChain(viewportScope, $attr.topVisible, adapter.topVisible) if $attr.topVisible
+							setValueChain(viewportScope, $attr.topVisibleElement, adapter.topVisibleElement) if $attr.topVisibleElement
+							setValueChain(viewportScope, $attr.topVisibleScope, adapter.topVisibleScope) if $attr.topVisibleScope
+							datasource.topVisible(item) if typeof datasource.topVisible is 'function'
 
 						loading = (value) ->
 							adapter.isLoading = value

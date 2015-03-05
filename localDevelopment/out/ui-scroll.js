@@ -30,7 +30,7 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 			terminal: true,
 			compile: function(elementTemplate, attr, linker) {
 				return function($scope, element, $attr, controllers) {
-					var adapter, adapterOnScope, adjustBuffer, adjustRowHeight, applyUpdate, bof, bottomVisiblePos, buffer, bufferPadding, bufferSize, builder, clipBottom, clipTop, datasource, datasourceName, doAdjustment, doDelete, doInsert, doUpdate, enqueueFetch, eof, eventListener, fetch, finalize, first, getValueChain, hideElementBeforeAppend, insert, isDatasourceValid, itemName, loading, log, match, next, pending, reload, removeFromBuffer, resizeAndScrollHandler, ridActual, scrollHeight, setValueChain, shouldLoadBottom, shouldLoadTop, showElementAfterRender, topVisible, topVisibleElement, topVisibleItem, topVisiblePos, topVisibleScope, viewport, viewportScope, wheelHandler;
+					var adapter, adapterOnScope, adjustBuffer, adjustRowHeight, applyUpdate, bof, bottomVisiblePos, buffer, bufferPadding, bufferSize, builder, clipBottom, clipTop, datasource, datasourceName, doAdjustment, doDelete, doInsert, doUpdate, enqueueFetch, eof, eventListener, fetch, finalize, first, getValueChain, hideElementBeforeAppend, insert, isDatasourceValid, itemName, loading, log, match, next, pending, reload, removeFromBuffer, resizeAndScrollHandler, ridActual, scrollHeight, setValueChain, shouldLoadBottom, shouldLoadTop, showElementAfterRender, topVisible, topVisiblePos, viewport, viewportScope, wheelHandler;
 					log = console.debug || console.log;
 					match = $attr.uiScroll.match(/^\s*(\w+)\s+in\s+([\w\.]+)\s*$/);
 					if (!match) {
@@ -156,32 +156,20 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 					});
 					viewport = builder.viewport;
 					viewportScope = viewport.scope() || $rootScope;
-					if (angular.isDefined($attr.topVisible)) {
-						topVisibleItem = function(item) {
-							return viewportScope[$attr.topVisible] = item;
-						};
-					}
-					if (angular.isDefined($attr.topVisibleElement)) {
-						topVisibleElement = function(element) {
-							return viewportScope[$attr.topVisibleElement] = element;
-						};
-					}
-					if (angular.isDefined($attr.topVisibleScope)) {
-						topVisibleScope = function(scope) {
-							return viewportScope[$attr.topVisibleScope] = scope;
-						};
-					}
 					topVisible = function(item) {
-						if (topVisibleItem) {
-							topVisibleItem(item.scope[itemName]);
+						adapter.topVisible = item.scope[itemName];
+						adapter.topVisibleElement = item.element;
+						adapter.topVisibleScope = item.scope;
+						if ($attr.topVisible) {
+							setValueChain(viewportScope, $attr.topVisible, adapter.topVisible);
 						}
-						if (topVisibleElement) {
-							topVisibleElement(item.element);
+						if ($attr.topVisibleElement) {
+							setValueChain(viewportScope, $attr.topVisibleElement, adapter.topVisibleElement);
 						}
-						if (topVisibleScope) {
-							topVisibleScope(item.scope);
+						if ($attr.topVisibleScope) {
+							setValueChain(viewportScope, $attr.topVisibleScope, adapter.topVisibleScope);
 						}
-						if (datasource.topVisible) {
+						if (typeof datasource.topVisible === 'function') {
 							return datasource.topVisible(item);
 						}
 					};

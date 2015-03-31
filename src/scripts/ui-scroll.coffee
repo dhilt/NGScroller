@@ -15,13 +15,13 @@ angular.module('ui.scroll', [])
 
 	.directive( 'uiScrollViewport'
 		[ '$log'
-			 ->
-					controller:
-						[ '$scope', '$element'
-							(scope, element) ->
-								this.viewport = element
-								this
-						]
+			->
+				controller:
+					[ '$scope', '$element'
+						(scope, element) ->
+							this.viewport = element
+							this
+					]
 
 		])
 
@@ -45,32 +45,29 @@ angular.module('ui.scroll', [])
 						itemName = match[1]
 						datasourceName = match[2]
 
-						getValueChain = (targetScope, target) ->
+						isDatasource = (datasource) ->
+							angular.isObject(datasource) and datasource.get and angular.isFunction(datasource.get)
+
+						getValueChain = (targetScope, target, isSet) ->
 							return if not targetScope
 							chain = target.match(/^([\w]+)\.(.+)$/)
-							return targetScope[target] if not chain or chain.length isnt 3
-							return getValueChain(targetScope[chain[1]], chain[2])
-
-						setValueChain = (targetScope, target, value, doNotSet) ->
-							return if not targetScope or not target
-							if not chain = target.match(/^([\w]+)\.(.+)$/)
-								return if target.indexOf('.') isnt -1
 							if not chain or chain.length isnt 3
-								return targetScope[target] = value if !angular.isObject(targetScope[target]) and !doNotSet
-								return targetScope[target] = value
-							targetScope[chain[1]] = {} if !angular.isObject(targetScope[chain[1]]) and !doNotSet
-							return setValueChain(targetScope[chain[1]], chain[2], value, doNotSet)
+								return targetScope[target] = {} if isSet and not angular.isObject(targetScope[target])
+								return targetScope[target]
+							targetScope[chain[1]] = {} if isSet and not angular.isObject(targetScope[chain[1]])
+							return getValueChain(targetScope[chain[1]], chain[2], isSet)
 
 						datasource = getValueChain($scope, datasourceName)
-						isDatasourceValid = () -> angular.isObject(datasource) and typeof datasource.get is 'function'
 
-						if !isDatasourceValid() # then try to inject datasource as service
+						if !isDatasource datasource
 							datasource = $injector.get(datasourceName)
-							if !isDatasourceValid()
-								throw new Error "#{datasourceName} is not a valid datasource"
+							throw new Error "#{datasourceName} is not a valid datasource" unless isDatasource datasource
+
+						adapterAttr = getValueChain($scope, $attr.adapter, true) if $attr.adapter
+						isLoadingAttr = getValueChain($scope, $attr.isLoading, true) if $attr.isLoading
 
 						bufferSize = Math.max(3, +$attr.bufferSize || 10)
-						bufferPadding = -> viewport.outerHeight() * Math.max(0.1, +$attr.padding || 0.1) # some extra space to initiate preload
+						bufferPadding = -> viewport.outerHeight() * Math.max(0.1, +$attr.padding || 0.1) # some extra space to initate preload
 
 						scrollHeight = (elem)->
 							elem[0].scrollHeight ? elem[0].document.documentElement.scrollHeight
@@ -128,18 +125,27 @@ angular.module('ui.scroll', [])
 
 						viewportScope = viewport.scope() || $rootScope
 
+						if angular.isDefined($attr.topVisible)
+							topVisibleItem = (item)->
+								viewportScope[$attr.topVisible] = item
+
+						if angular.isDefined($attr.topVisibleElement)
+							topVisibleElement = (element)->
+								viewportScope[$attr.topVisibleElement] = element
+
+						if angular.isDefined($attr.topVisibleScope)
+							topVisibleScope = (scope)->
+								viewportScope[$attr.topVisibleScope] = scope
+
 						topVisible = (item) ->
-							adapter.topVisible = item.scope[itemName]
-							adapter.topVisibleElement = item.element
-							adapter.topVisibleScope = item.scope
-							setValueChain(viewportScope, $attr.topVisible, adapter.topVisible) if $attr.topVisible
-							setValueChain(viewportScope, $attr.topVisibleElement, adapter.topVisibleElement) if $attr.topVisibleElement
-							setValueChain(viewportScope, $attr.topVisibleScope, adapter.topVisibleScope) if $attr.topVisibleScope
-							datasource.topVisible(item) if typeof datasource.topVisible is 'function'
+							topVisibleItem(item.scope[itemName]) if topVisibleItem
+							topVisibleElement(item.element) if topVisibleElement
+							topVisibleScope(item.scope) if topVisibleScope
+							datasource.topVisible(item) if datasource.topVisible
 
 						loading = (value) ->
 							adapter.isLoading = value
-							setValueChain($scope, $attr.isLoading, value) if $attr.isLoading
+							isLoadingAttr = value if $attr.isLoading
 							datasource.loading(value) if typeof datasource.loading is 'function'
 
 						ridActual = 0
@@ -406,7 +412,6 @@ angular.module('ui.scroll', [])
 						# adapter initializing
 
 						adapter = {}
-						adapter.isLoading = false
 
 						applyUpdate = (wrapper, newItems) ->
 							inserted = []
@@ -445,19 +450,17 @@ angular.module('ui.scroll', [])
 							else
 								# arg1 is item index, arg2 is the newItems array
 								if arg1%1 == 0 # checking if it is an integer
-									if 0 <= arg1-first-1 < buffer.length
+									if 0 <= arg-first-1 < buffer.length
 										inserted = applyUpdate buffer[arg1 - first], arg2
 								else
 									throw new Error "applyUpdates - #{arg1} is not a valid index or outside of range"
 							adjustBuffer(ridActual, inserted)
 
+						adapter.isLoading = false
+
 						if $attr.adapter # so we have an adapter on $scope
-							adapterOnScope = getValueChain($scope, $attr.adapter)
-							if not adapterOnScope
-								setValueChain($scope, $attr.adapter, {})
-								adapterOnScope = getValueChain($scope, $attr.adapter)
-							angular.extend(adapterOnScope, adapter)
-							adapter = adapterOnScope
+							angular.extend(adapterAttr, adapter)
+							adapter = adapterAttr
 
 
 						# update events (are deprecated since v1.1.0)

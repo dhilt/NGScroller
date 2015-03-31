@@ -75,7 +75,7 @@ dl as a repeated tag is not supported.
 The value is relative to the visible height of the area, the default is 0.5 and the minimal value is 0.3
 * **adapter - name**, optional - if provided a reference to the adapter object for the scroller instance will be placed in the member with the said name on the scope associated with the viewport. If the viewport is the window, the value will be placed on the $rootScope. The adapter is a collection of methods and properties to manipulate and assess the scroller the adapter was created for.
 
-Some of the properties offered by the adapter can also be accessed directly from the directive by using matching attributes. The syntax for such attributes allows for providing a name under which the appropariate value will be placed on the scope associated with the viewport. If the viewport is the window, the value will be placed on the $rootScope. Below is a list of such attributes:
+Some of the properties offered by the adapter can also be accessed directly from the directive by using matching attributes. In the same way as for the adapter attribute syntax for such attributes allows for providing a name under which the appropariate value will be placed on the scope associated with the viewport. If the viewport is the window, the value will be placed on the $rootScope. Below is a list of such attributes:
 
 * **is-loading - name**, optional - a boolean value indicating whether there are any pending load requests will be placed in the member with the said name. See also `isLoading` adapter property.
 * **top-visible - name**, optional - a reference to the item currently in the topmost visible position will be placed in the member with the said name. See also `topVisible` adapter property.
@@ -125,38 +125,26 @@ exactly `count` elements unless it hit eof/bof
 ###Adapter
 Adapter object is a collection of methods and properties to be used to assess and manipulate the scroller instance adapater is created for. Adapter based API replaces old (undocumented) event based API introduced earlier for this purpose. The event based API is now deprecated but will remain available for backwards compatibililty purposes.
 
-####Manipulating the scroller content with adapter methods
-All three methods use the first parameter to locate the items the operation intends to affect. The value of the parameter can be either an integer or a function. If the value is an integer, it is expected to be an index for the item. If it is a function, the function will be called for every item currently in the buffer. The $scope created for the item will be passed to the locator function and the operation will be applied to the item if the locator function returns truthy value.
+####Manipulating the scroller content with applyUpdates method
 
-**Important:** Keep in mind that the modifications made by the manipulation methods are only applied to the content of the buffer. As the items in response to scrolling are pushed out of the buffer, the modifications are lost. Therefore it is your responsibility to ensure that as the scroller is scrolled back and a modified item is requested from the datasource again the values returned would reflect the updated state. In other words you have to make sure that in addition to manipulating the scroller content you also apply the modifications to the dataset underlying the datasource.
+Method `applyUpdates` provides a way to update the scroller content without full reload of the content from the datasource. The updates are performed by changing the items in the scroller internal buffer after they are loaded from the datasource. An item in the buffer can be deleted or modified. Also several items can be inserted to replace a given item.
 
-####Content manipulation methods:
+* Method `applyUpdates(index, newItems)`
 
-* Method `insert`
-
-        insert(locator, item)
     #### Description
-    Inserts a new item after the item identified by the locator
+    Updates scroller content at the given location in the dataset
 #### Parameters
-    * **locator** index of the item the new item have to be inserted after.
-    * **item** the item to be inserted in the buffer.
+    * **index** index of the item to be affected in the dataset.
+    * **newItems** an array of items to replace the affected item. If the array is empty (`[]`) the item will be deleted, otherwise the items in the array replace the affected item.
 
-* Method `update`
+* Method `applyUpdates(updater)`
 
-        update(locator, item)
     #### Description
-    Updates an item(s) currently in the buffer
+    Updates scroller content as determined by the updater function
 #### Parameters
-    * **locator** if it is an integer, it is treated as an index of the item to be replaced. If it is a function it is called for every item currently in the buffer. If the locator is a function, the second parameter (item) is ignored. The necessary updates can be made directly from within the locator function
-    * **item** new item to replace in the buffer the existing item in this position. The item parameter is ignored if the locator parameter is a function
+    * **updater** a function to be applied to every item currently in the buffer. The function will recieve 3 parameters: `item`, `scope`, and `element`. Here `item` is the item to be affected, `scope` is the item $scope, and `element` is the html element for the item. The return value of the function should be an array of items. Similarly to the `newItem` parameter (see above), if the array is empty(`[]`), the item is deleted, otherwise the item is replaced by the items in the array. If the return value is not an array, the item remains unaffected, unless some updates were made to the item in the updater function. This can be thought of as in place update. 
 
-* Method `delete`
-
-        delete(locator)
-    #### Description
-    Deletes item(s) from the buffer
-#### Parameters
-    * **locator** if it is an integer, it is treated as an index of the item to be deleted. If it is a function, all items the function reutns truthy for will be deleted from the buffer.
+**Important: update datasource to match the scroller buffer content:** Keep in mind that the modifications made by the `applyUpdates` methods are only applied to the content of the buffer. As the items in response to scrolling are pushed out of the buffer, the modifications are lost. It is your responsibility to ensure that as the scroller is scrolled back and a modified item is requested from the datasource again the values returned by the datasource would reflect the updated state. In other words you have to make sure that in addition to manipulating the scroller content you also apply the modifications to the dataset underlying the datasource.
 
 ####Adapter properties
 
@@ -190,20 +178,14 @@ it to you to do it properly - whatever properly means in your book.
 
 See [index.html](http://rawgithub.com/Hill30/NGScroller/master/src/index.html)
 
-###Debugging coffeeScript directly in the browser
-
-With adding sourceURL setting the source maps for the coffeScript seem to be functional now - at least with Chrome. You can set breakpoints and inspect values form the coffeeScript source window. 
-
-There is one dirty trick though - to make the breakpoints stick, the first one to be hit **has** to be set from the javascript source window. With the way the sample source code is, open the source code dropdown and select the source called 'src/scripts/application.js' under 'no domain', and place the breakpoint on the second line of the code in this file. Because of source mapping the blue arrow indicating the breakpoint will be put in the corresponding place of the coffeeScript code (application.coffee in this case), so you will not see it in the application.js. Now, if you refresh the page, Chrome will break on the first line of the code in the application.coffee. 
-
-Once the first breakpoint set up this way is hit, the rest of them will work just fine. You can set and/or remove them directly in coffeeScript. Just do not remove the first one - as soon as you do, the rest of you breakpoints while still visible in the editor will cease to work.
-
-Do not ask me why this woodoo is necessary, but as of Chrome version 30 it is just the way it is.
-
 ###History
+
+####v1.1.1
+* Fixed jqlite on $destroy error.
 
 ####v1.1.0
 * Introduced API to dynamically update scroller content.
+* Deep 'name' properties access via dot-notation in template.
 * Fixed the problem occuring if the scroller is $destroyed while there are requests pending: [#64](https://github.com/Hill30/NGScroller/issues/64).
 
 ####v1.0.3

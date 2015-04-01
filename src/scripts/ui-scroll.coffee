@@ -138,6 +138,7 @@ angular.module('ui.scroll', [])
 							datasource.topVisible(item) if typeof datasource.topVisible is 'function'
 
 						loading = (value) ->
+							$scope.$broadcast('renderDeferred') if not value
 							adapter.isLoading = value
 							setValueChain($scope, $attr.isLoading, value) if $attr.isLoading
 							datasource.loading(value) if typeof datasource.loading is 'function'
@@ -504,6 +505,16 @@ angular.module('ui.scroll', [])
 						eventListener.$on "delete.items", (event, locator)-> doDelete(locator)
 
 		])
+
+.directive('uiScrollDeferred'
+	() ->
+		template: '<span ng-if="isRenderingResolved" ng-transclude></span>'
+		transclude: true
+		link: (scope, element, attrs) ->
+			_off = scope.$on 'renderDeferred', () ->
+				scope.isRenderingResolved = true
+				_off() # just to prevent event firing on already rendered items
+)
 
 ###
 //# sourceURL=src/scripts/ui-scroll.js

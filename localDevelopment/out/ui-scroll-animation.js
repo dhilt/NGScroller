@@ -22,7 +22,7 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 		};
 	}
 ]).directive('uiScroll', [
-	'$log', '$injector', '$rootScope', '$timeout', '$q', function(console, $injector, $rootScope, $timeout, $q) {
+	'$log', '$injector', '$rootScope', '$timeout', '$q', '$parse', function(console, $injector, $rootScope, $timeout, $q, $parse) {
 		var $animate;
 		if ($injector.has && $injector.has('$animate')) {
 			$animate = $injector.get('$animate');
@@ -34,7 +34,7 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 			terminal: true,
 			compile: function(elementTemplate, attr, linker) {
 				return function($scope, element, $attr, controllers) {
-					var adapter, adapterOnScope, adjustBuffer, applyUpdate, bof, bottomVisiblePos, buffer, bufferPadding, bufferSize, builder, clipBottom, clipTop, datasource, datasourceName, doDelete, doInsert, doUpdate, enqueueFetch, eof, eventListener, fetch, finalize, first, getValueChain, insertElement, insertElementAnimated, insertItem, isDatasourceValid, itemName, loading, log, match, next, pending, reload, removeFromBuffer, removeItem, resizeAndScrollHandler, ridActual, scrollHeight, setValueChain, shouldLoadBottom, shouldLoadTop, topVisible, topVisiblePos, viewport, viewportScope, wheelHandler;
+					var adapter, adapterOnScope, adjustBuffer, applyUpdate, bof, bottomVisiblePos, buffer, bufferPadding, bufferSize, builder, clipBottom, clipTop, datasource, datasourceName, doDelete, doInsert, doUpdate, enqueueFetch, eof, eventListener, fetch, finalize, first, insertElement, insertElementAnimated, insertItem, isDatasourceValid, itemName, loading, log, match, next, pending, reload, removeFromBuffer, removeItem, resizeAndScrollHandler, ridActual, scrollHeight, shouldLoadBottom, shouldLoadTop, topVisible, topVisiblePos, viewport, viewportScope, wheelHandler;
 					log = console.debug || console.log;
 					match = $attr.uiScroll.match(/^\s*(\w+)\s+in\s+([\w\.]+)\s*$/);
 					if (!match) {
@@ -42,37 +42,9 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 					}
 					itemName = match[1];
 					datasourceName = match[2];
-					getValueChain = function(targetScope, target) {
-						var chain;
-						if (!targetScope) {
-							return;
-						}
-						chain = target.match(/^([\w]+)\.(.+)$/);
-						if (!chain || chain.length !== 3) {
-							return targetScope[target];
-						}
-						return getValueChain(targetScope[chain[1]], chain[2]);
-					};
-					setValueChain = function(targetScope, target, value) {
-						var chain;
-						if (!targetScope || !target) {
-							return;
-						}
-						chain = target.match(/^([\w]+)\.(.+)$/);
-						if (!chain && target.indexOf('.') !== -1) {
-							return;
-						}
-						if (!chain || chain.length !== 3) {
-							return targetScope[target] = value;
-						}
-						if (!angular.isObject(targetScope[chain[1]])) {
-							targetScope[chain[1]] = {};
-						}
-						return setValueChain(targetScope[chain[1]], chain[2], value);
-					};
-					datasource = getValueChain($scope, datasourceName);
+					datasource = $parse(datasourceName)($scope);
 					isDatasourceValid = function() {
-						return angular.isObject(datasource) && typeof datasource.get === 'function';
+						return angular.isObject(datasource) && angular.isFunction(datasource.get);
 					};
 					if (!isDatasourceValid()) {
 						datasource = $injector.get(datasourceName);
@@ -199,24 +171,24 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 						adapter.topVisibleElement = item.element;
 						adapter.topVisibleScope = item.scope;
 						if ($attr.topVisible) {
-							setValueChain(viewportScope, $attr.topVisible, adapter.topVisible);
+							$parse($attr.topVisible).assign(viewportScope, adapter.topVisible);
 						}
 						if ($attr.topVisibleElement) {
-							setValueChain(viewportScope, $attr.topVisibleElement, adapter.topVisibleElement);
+							$parse($attr.topVisibleElement).assign(viewportScope, adapter.topVisibleElement);
 						}
 						if ($attr.topVisibleScope) {
-							setValueChain(viewportScope, $attr.topVisibleScope, adapter.topVisibleScope);
+							$parse($attr.topVisibleScope).assign(viewportScope, adapter.topVisibleScope);
 						}
-						if (typeof datasource.topVisible === 'function') {
+						if (angular.isFunction(datasource.topVisible)) {
 							return datasource.topVisible(item);
 						}
 					};
 					loading = function(value) {
 						adapter.isLoading = value;
 						if ($attr.isLoading) {
-							setValueChain($scope, $attr.isLoading, value);
+							$parse($attr.isLoading).assign($scope, value);
 						}
-						if (typeof datasource.loading === 'function') {
+						if (angular.isFunction(datasource.loading)) {
 							return datasource.loading(value);
 						}
 					};
@@ -346,7 +318,7 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 						}
 					};
 					adjustBuffer = function(rid, finalize) {
-						var i, item, j, k, l, len, len1, len2, len3, m, newHeight, promises, toBePrepended, toBeRemoved, wrapper;
+						var i, j, len, promises, toBePrepended, toBeRemoved, wrapper;
 						promises = [];
 						toBePrepended = [];
 						toBeRemoved = [];
@@ -379,6 +351,7 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 							}
 						}
 						return $timeout(function() {
+							var item, itemHeight, itemTop, k, l, len1, len2, len3, len4, m, n, newHeight, newRow, rowTop, topHeight;
 							for (k = 0, len1 = toBePrepended.length; k < len1; k++) {
 								wrapper = toBePrepended[k];
 								builder.insertElement(wrapper.element);
@@ -398,7 +371,6 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 								item = buffer[i];
 								item.scope.$index = first + i;
 							}
-							var itemHeight, itemTop, len4, n, newRow, rowTop, topHeight;
 							if (shouldLoadBottom()) {
 								enqueueFetch(rid, true);
 							} else {
@@ -574,10 +546,10 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 						return adjustBuffer(ridActual);
 					};
 					if ($attr.adapter) {
-						adapterOnScope = getValueChain($scope, $attr.adapter);
+						adapterOnScope = $parse($attr.adapter)($scope);
 						if (!adapterOnScope) {
-							setValueChain($scope, $attr.adapter, {});
-							adapterOnScope = getValueChain($scope, $attr.adapter);
+							$parse($attr.adapter).assign($scope, {});
+							adapterOnScope = $parse($attr.adapter)($scope);
 						}
 						angular.extend(adapterOnScope, adapter);
 						adapter = adapterOnScope;

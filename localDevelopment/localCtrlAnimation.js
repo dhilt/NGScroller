@@ -21,18 +21,20 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite', 'ngAnimate']).co
 
 		var idList;
 
-		$scope.adapter = {
-			remain: true
+		$scope.adapterContainer = {
+			adapter: {
+				remain: true
+			}
 		};
 
 		$scope.updateList = function() {
-			return $scope.adapter.applyUpdates(function(item, scope) {
+			return $scope.adapterContainer.adapter.applyUpdates(function(item, scope) {
 				return item.content += " *";
 			});
 		};
 
 		$scope.removeFromList = function() {
-			return $scope.adapter.applyUpdates(function(item, scope) {
+			return $scope.adapterContainer.adapter.applyUpdates(function(item, scope) {
 				if (scope.$index % 2 === 0) {
 					return [];
 				}
@@ -42,7 +44,7 @@ angular.module('application', ['ui.scroll', 'ui.scroll.jqlite', 'ngAnimate']).co
 		idList = 1000;
 
 		$scope.addToList = function() {
-			return $scope.adapter.applyUpdates(function(item, scope) {
+			return $scope.adapterContainer.adapter.applyUpdates(function(item, scope) {
 				var newItem;
 				if (scope.$index === 2) {
 					newItem = {

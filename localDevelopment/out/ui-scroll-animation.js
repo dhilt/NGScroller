@@ -378,26 +378,26 @@ angular.module('ui.scroll', []).directive('uiScrollViewport', [
 									toBeRemoved.push(wrapper);
 							}
 						}
-						for (k = 0, len1 = toBePrepended.length; k < len1; k++) {
-							wrapper = toBePrepended[k];
-							builder.insertElement(wrapper.element);
-							newHeight = builder.topPadding() - wrapper.element.outerHeight(true);
-							if (newHeight >= 0) {
-								builder.topPadding(newHeight);
-							} else {
-								viewport.scrollTop(viewport.scrollTop() + wrapper.element.outerHeight(true));
+						return $timeout(function() {
+							for (k = 0, len1 = toBePrepended.length; k < len1; k++) {
+								wrapper = toBePrepended[k];
+								builder.insertElement(wrapper.element);
+								newHeight = builder.topPadding() - wrapper.element.outerHeight(true);
+								if (newHeight >= 0) {
+									builder.topPadding(newHeight);
+								} else {
+									viewport.scrollTop(viewport.scrollTop() + wrapper.element.outerHeight(true));
+								}
+								wrapper.op = 'none';
 							}
-							wrapper.op = 'none';
-						}
-						for (l = 0, len2 = toBeRemoved.length; l < len2; l++) {
-							wrapper = toBeRemoved[l];
-							promises = promises.concat(removeItem(wrapper));
-						}
-						for (i = m = 0, len3 = buffer.length; m < len3; i = ++m) {
-							item = buffer[i];
-							item.scope.$index = first + i;
-						}
-						$timeout(function() {
+							for (l = 0, len2 = toBeRemoved.length; l < len2; l++) {
+								wrapper = toBeRemoved[l];
+								promises = promises.concat(removeItem(wrapper));
+							}
+							for (i = m = 0, len3 = buffer.length; m < len3; i = ++m) {
+								item = buffer[i];
+								item.scope.$index = first + i;
+							}
 							var itemHeight, itemTop, len4, n, newRow, rowTop, topHeight;
 							if (shouldLoadBottom()) {
 								enqueueFetch(rid, true);
